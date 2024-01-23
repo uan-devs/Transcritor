@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:transcritor/src/common/themes/dark_theme.dart';
 
 class MainApp extends StatelessWidget {
@@ -6,6 +7,8 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FlutterNativeSplash.remove();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: darkTheme(),
