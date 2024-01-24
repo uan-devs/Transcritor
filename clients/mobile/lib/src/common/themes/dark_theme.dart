@@ -9,6 +9,7 @@ ThemeData darkTheme() {
   return base.copyWith(
     colorScheme: const ColorScheme.dark(
       background: MyColors.black87,
+      primary: MyColors.green,
     ),
     scaffoldBackgroundColor: MyColors.black87,
     extensions: [CustomThemeExtension.darkMode],
