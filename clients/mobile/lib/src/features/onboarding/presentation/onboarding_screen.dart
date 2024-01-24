@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:transcritor/src/common/routes/app_router.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
+import 'package:transcritor/src/features/onboarding/presentation/onboarding_controller.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late PageController _pageController;
   int _pageIndex = 0;
 
@@ -28,6 +32,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final onboardingController = ref.watch(onboardingControllerProvider);
+
     return Scaffold(
       body: SafeArea(
         top: false,
@@ -93,7 +99,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Visibility(
                     visible: !_isLastPage,
                     replacement: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        onboardingController.setOnboardingCompleted();
+                        context.goNamed(AppRoute.home.name);
+                      },
                       child: const Text('Get Started'),
                     ),
                     child: ElevatedButton(
