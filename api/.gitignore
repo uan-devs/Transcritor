@@ -1,0 +1,37 @@
+# Arquivos temporários
+*.pyc
+*.pyo
+*.pyd
+
+# Ambientes virtuais
+venv/
+env/
+
+# Arquivos de configuração
+db.sqlite3
+.env
+
+# Arquivos de log
+*.log
+
+# Arquivos compilados e bytecode
+__pycache__/
+
+# Arquivos de mídia
+media/
+
+# Arquivos de configuração do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de configuração do editor
+.idea/
+.vscode/
+
+# Arquivos gerados pelo sistema operacional
+*.pyproj
+*.pycproj
+*.suo
+*.user
+*.sln
+*.swp
