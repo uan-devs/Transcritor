@@ -101,7 +101,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     replacement: ElevatedButton(
                       onPressed: () {
                         onboardingController.setOnboardingCompleted();
-                        context.goNamed(AppRoute.home.name);
+                        context.pushReplacementNamed(AppRoute.signup.name);
                       },
                       child: const Text('Get Started'),
                     ),
