@@ -33,11 +33,12 @@ GoRouter goRouter(ProviderRef ref) {
       const isLoggedIn = false;
 
       // ignore: dead_code
-      if (isLoggedIn) {
-        return '/home';
+      if (!isLoggedIn) {
+        return '/login';
       }
 
-      return '/signup';
+      // ignore: dead_code
+      return null;
     },
     routes: [
       GoRoute(
