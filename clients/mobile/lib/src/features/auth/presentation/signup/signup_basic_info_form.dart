@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:validatorless/validatorless.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_form_status_bar.dart';
 
@@ -16,6 +17,24 @@ class SignupBasicInfoForm extends StatefulWidget {
 
 class _SignupBasicInfoFormState extends State<SignupBasicInfoForm>
     with AutomaticKeepAliveClientMixin<SignupBasicInfoForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _surnameController = TextEditingController();
+  final _provinceController = TextEditingController();
+
+  bool get _isFormValid {
+    return (_formKey.currentState?.validate() ?? false) &&
+        _provinceController.text.isNotEmpty;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
+    _provinceController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -62,10 +81,24 @@ class _SignupBasicInfoFormState extends State<SignupBasicInfoForm>
                 margin: const EdgeInsets.only(top: 40),
                 width: MediaQuery.sizeOf(context).width * 0.8,
                 child: Form(
+                  key: _formKey,
                   child: Column(
                     children: [
                       TextFormField(
+                        controller: _nameController,
                         onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                        textInputAction: TextInputAction.next,
+                        validator: Validatorless.multiple([
+                          Validatorless.required('Nome é obrigatório'),
+                          Validatorless.min(
+                            3,
+                            'Nome deve ter no mínimo 3 caracteres',
+                          ),
+                          Validatorless.max(
+                            20,
+                            'Nome deve ter no máximo 20 caracteres',
+                          ),
+                        ]),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.person),
                           prefixIconColor: MyColors.green,
@@ -78,7 +111,20 @@ class _SignupBasicInfoFormState extends State<SignupBasicInfoForm>
                       ),
                       const SizedBox(height: 24),
                       TextFormField(
+                        controller: _surnameController,
                         onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                        textInputAction: TextInputAction.done,
+                        validator: Validatorless.multiple([
+                          Validatorless.required('Sobrenome é obrigatório'),
+                          Validatorless.min(
+                            3,
+                            'Sobrenome deve ter no mínimo 3 caracteres',
+                          ),
+                          Validatorless.max(
+                            20,
+                            'Sobrenome deve ter no máximo 20 caracteres',
+                          ),
+                        ]),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.person),
                           prefixIconColor: MyColors.green,
@@ -93,6 +139,14 @@ class _SignupBasicInfoFormState extends State<SignupBasicInfoForm>
                       Align(
                         alignment: Alignment.centerLeft,
                         child: DropdownMenu<AngolaProvinces>(
+                          controller: _provinceController,
+                          onSelected: (province) {
+                            if (province != null) {
+                              setState(() {
+                                _provinceController.text = province.label;
+                              });
+                            }
+                          },
                           width: MediaQuery.sizeOf(context).width * 0.8,
                           menuHeight: 200,
                           enableSearch: false,
@@ -120,7 +174,7 @@ class _SignupBasicInfoFormState extends State<SignupBasicInfoForm>
                       Align(
                         alignment: Alignment.centerRight,
                         child: ElevatedButton(
-                          onPressed: widget.onContinue,
+                          onPressed: _isFormValid ? widget.onContinue : null,
                           child: const Icon(
                             Icons.arrow_forward,
                             color: Colors.black,

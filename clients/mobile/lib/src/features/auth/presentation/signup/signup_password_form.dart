@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_form_status_bar.dart';
+import 'package:validatorless/validatorless.dart';
 
 class SignupPasswordForm extends StatefulWidget {
   const SignupPasswordForm({
@@ -18,6 +19,19 @@ class SignupPasswordForm extends StatefulWidget {
 
 class _SignupPasswordFormState extends State<SignupPasswordForm>
     with AutomaticKeepAliveClientMixin<SignupPasswordForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool get _isFormValid => _formKey.currentState?.validate() ?? false;
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -67,12 +81,26 @@ class _SignupPasswordFormState extends State<SignupPasswordForm>
                 margin: const EdgeInsets.only(top: 40),
                 width: MediaQuery.sizeOf(context).width * 0.8,
                 child: Form(
+                  key: _formKey,
                   child: Column(
                     children: [
                       TextFormField(
+                        controller: _passwordController,
                         onTapOutside: (_) => FocusScope.of(context).unfocus(),
                         keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.next,
                         obscureText: true,
+                        validator: Validatorless.multiple([
+                          Validatorless.required('Senha é obrigatória'),
+                          Validatorless.min(
+                              6, 'Senha deve ter no mínimo 6 caracteres'),
+                          Validatorless.regex(
+                            RegExp(
+                              r'^(?=.*?[0-9])(?=.*?[^\w\s]).{6,}$',
+                            ),
+                            'Senha deve conter 1 número e 1 caractere especial',
+                          ),
+                        ]),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock),
                           prefixIconColor: MyColors.green,
@@ -85,9 +113,19 @@ class _SignupPasswordFormState extends State<SignupPasswordForm>
                       ),
                       const SizedBox(height: 24),
                       TextFormField(
+                        controller: _confirmPasswordController,
                         onTapOutside: (_) => FocusScope.of(context).unfocus(),
                         keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.done,
                         obscureText: true,
+                        validator: Validatorless.multiple([
+                          Validatorless.required(
+                              'Confirmação de senha é obrigatória'),
+                          Validatorless.compare(
+                            _passwordController,
+                            'Senhas não conferem',
+                          ),
+                        ]),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock),
                           prefixIconColor: MyColors.green,
@@ -110,7 +148,7 @@ class _SignupPasswordFormState extends State<SignupPasswordForm>
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: widget.onContinue,
+                            onPressed: _isFormValid ? widget.onContinue : null,
                             child: const Icon(
                               Icons.arrow_forward,
                               color: Colors.black,

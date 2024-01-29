@@ -19,9 +19,16 @@ class SignupOTPForm extends StatefulWidget {
 
 class _SignupOTPFormState extends State<SignupOTPForm>
     with AutomaticKeepAliveClientMixin<SignupOTPForm> {
+  final Map<int, String> _otp = {};
+
+  bool get _isFormValid => _otp.length == 6;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    debugPrint(
+        'isFormValid: $_isFormValid | OTP: $_otp | Length: ${_otp.length}');
 
     return SafeArea(
       child: CustomScrollView(
@@ -85,7 +92,14 @@ class _SignupOTPFormState extends State<SignupOTPForm>
                                 },
                                 onChanged: (value) {
                                   if (value.length == 1) {
+                                    setState(() {
+                                      _otp[index] = value;
+                                    });
                                     FocusScope.of(context).nextFocus();
+                                  } else {
+                                    setState(() {
+                                      _otp.remove(index);
+                                    });
                                   }
                                 },
                                 textAlign: TextAlign.center,
@@ -137,7 +151,7 @@ class _SignupOTPFormState extends State<SignupOTPForm>
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: _isFormValid ? () {} : null,
                             child: const Text(
                               'Verificar',
                               style: TextStyle(color: Colors.black),

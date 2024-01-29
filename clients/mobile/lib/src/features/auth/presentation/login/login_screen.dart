@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transcritor/src/common/routes/app_router.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
+import 'package:validatorless/validatorless.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +13,19 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool get _isFormValid => _formKey.currentState?.validate() ?? false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,11 +62,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   margin: const EdgeInsets.only(top: 40),
                   width: MediaQuery.sizeOf(context).width * 0.8,
                   child: Form(
+                    key: _formKey,
                     child: Column(
                       children: [
                         TextFormField(
+                          controller: _emailController,
                           onTapOutside: (_) => FocusScope.of(context).unfocus(),
                           keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          validator: Validatorless.multiple([
+                            Validatorless.required('Email obrigatório'),
+                            Validatorless.email('Email inválido'),
+                          ]),
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.email),
                             prefixIconColor: MyColors.green,
@@ -65,9 +86,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 24),
                         TextFormField(
+                          controller: _passwordController,
                           onTapOutside: (_) => FocusScope.of(context).unfocus(),
                           keyboardType: TextInputType.text,
                           obscureText: true,
+                          textInputAction: TextInputAction.done,
+                          validator: Validatorless.multiple([
+                            Validatorless.required('Senha obrigatória'),
+                            Validatorless.min(
+                                6, 'Senha deve ter no mínimo 6 caracteres'),
+                            Validatorless.regex(
+                              RegExp(
+                                r'^(?=.*?[0-9])(?=.*?[^\w\s]).{6,}$',
+                              ),
+                              'Senha deve conter 1 número e 1 caractere especial',
+                            ),
+                          ]),
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.lock),
                             prefixIconColor: MyColors.green,
@@ -105,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             ElevatedButton(
-                              onPressed: () {},
+                              onPressed: _isFormValid ? () {} : null,
                               child: const Text(
                                 'Entrar',
                                 style: TextStyle(color: Colors.black),
