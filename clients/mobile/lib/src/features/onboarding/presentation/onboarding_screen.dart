@@ -101,7 +101,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     replacement: ElevatedButton(
                       onPressed: () {
                         onboardingController.setOnboardingCompleted();
-                        context.pushReplacementNamed(AppRoute.signup.name);
+                        context.pushReplacementNamed(AppRoute.login.name);
                       },
                       child: const Text('Get Started'),
                     ),
@@ -154,13 +154,13 @@ const List<OnboardingSlide> onboardingSlides = [
     title: 'Explore Transcrições Precisas',
     description:
         'Bem-vindo ao Ango Speech To Text, onde a precisão na transcrição é a nossa prioridade. Transforme áudio em texto com confiança e eficiência.',
-    image: 'assets/images/transcritor-logo.png',
+    image: 'assets/images/onboarding-img-04.jpg',
   ),
   OnboardingSlide(
     title: 'Sugestões de Correção',
     description:
         'Participe na melhoria contínua! Oferecemos a opção de enviar sugestões de correção para aprimorar a precisão das transcrições.',
-    image: 'assets/images/correction-image.jpg',
+    image: 'assets/images/onboarding-img-03.jpg',
   ),
   OnboardingSlide(
     title: 'Tradução Simples e Rápida',
@@ -172,7 +172,7 @@ const List<OnboardingSlide> onboardingSlides = [
     title: 'Transcrição em Tempo Real',
     description:
         'Experimente a magia da transcrição em tempo real com o Ango Speech To Text. Veja suas palavras ganharem vida instantaneamente à medida que você fala.',
-    image: 'assets/images/recorder-image.jpg',
+    image: 'assets/images/onboarding-img-05.jpg',
   ),
 ];
 
