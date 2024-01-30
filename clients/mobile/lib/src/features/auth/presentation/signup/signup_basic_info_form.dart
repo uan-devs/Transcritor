@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:transcritor/src/features/auth/presentation/signup/signup_controller.dart';
 import 'package:validatorless/validatorless.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_form_status_bar.dart';
 
-class SignupBasicInfoForm extends StatefulWidget {
+class SignupBasicInfoForm extends ConsumerStatefulWidget {
   const SignupBasicInfoForm({
     super.key,
     required this.onContinue,
@@ -12,10 +14,11 @@ class SignupBasicInfoForm extends StatefulWidget {
   final VoidCallback onContinue;
 
   @override
-  State<SignupBasicInfoForm> createState() => _SignupBasicInfoFormState();
+  ConsumerState<SignupBasicInfoForm> createState() =>
+      _SignupBasicInfoFormState();
 }
 
-class _SignupBasicInfoFormState extends State<SignupBasicInfoForm>
+class _SignupBasicInfoFormState extends ConsumerState<SignupBasicInfoForm>
     with AutomaticKeepAliveClientMixin<SignupBasicInfoForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -38,6 +41,8 @@ class _SignupBasicInfoFormState extends State<SignupBasicInfoForm>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    final _signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
 
     return SafeArea(
       child: CustomScrollView(
@@ -174,7 +179,16 @@ class _SignupBasicInfoFormState extends State<SignupBasicInfoForm>
                       Align(
                         alignment: Alignment.centerRight,
                         child: ElevatedButton(
-                          onPressed: _isFormValid ? widget.onContinue : null,
+                          onPressed: _isFormValid
+                              ? () {
+                                  _signupStateNotifier.setBasicInfo(
+                                    name: _nameController.text,
+                                    surname: _surnameController.text,
+                                    province: _provinceController.text,
+                                  );
+                                  widget.onContinue();
+                                }
+                              : null,
                           child: const Icon(
                             Icons.arrow_forward,
                             color: Colors.black,

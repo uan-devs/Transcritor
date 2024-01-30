@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_field/countries.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
+import 'package:transcritor/src/features/auth/presentation/signup/signup_controller.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_form_status_bar.dart';
 import 'package:validatorless/validatorless.dart';
 
-class SignupContactForm extends StatefulWidget {
+class SignupContactForm extends ConsumerStatefulWidget {
   const SignupContactForm({
     super.key,
     required this.onContinue,
@@ -16,10 +18,10 @@ class SignupContactForm extends StatefulWidget {
   final VoidCallback onBack;
 
   @override
-  State<SignupContactForm> createState() => _SignupContactFormState();
+  ConsumerState<SignupContactForm> createState() => _SignupContactFormState();
 }
 
-class _SignupContactFormState extends State<SignupContactForm>
+class _SignupContactFormState extends ConsumerState<SignupContactForm>
     with AutomaticKeepAliveClientMixin<SignupContactForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -37,6 +39,8 @@ class _SignupContactFormState extends State<SignupContactForm>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    final _signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -129,8 +133,15 @@ class _SignupContactFormState extends State<SignupContactForm>
                               ),
                             ),
                             ElevatedButton(
-                              onPressed:
-                                  _isFormValid ? widget.onContinue : null,
+                              onPressed: _isFormValid
+                                  ? () {
+                                      _signupStateNotifier.setContactInfo(
+                                        email: _emailController.text,
+                                        phone: _phoneController.text,
+                                      );
+                                      widget.onContinue();
+                                    }
+                                  : null,
                               child: const Icon(
                                 Icons.arrow_forward,
                                 color: Colors.black,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
+import 'package:transcritor/src/features/auth/presentation/signup/signup_controller.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_form_status_bar.dart';
 import 'package:validatorless/validatorless.dart';
 
-class SignupPasswordForm extends StatefulWidget {
+class SignupPasswordForm extends ConsumerStatefulWidget {
   const SignupPasswordForm({
     super.key,
     required this.onContinue,
@@ -14,10 +16,10 @@ class SignupPasswordForm extends StatefulWidget {
   final VoidCallback onBack;
 
   @override
-  State<SignupPasswordForm> createState() => _SignupPasswordFormState();
+  ConsumerState<SignupPasswordForm> createState() => _SignupPasswordFormState();
 }
 
-class _SignupPasswordFormState extends State<SignupPasswordForm>
+class _SignupPasswordFormState extends ConsumerState<SignupPasswordForm>
     with AutomaticKeepAliveClientMixin<SignupPasswordForm> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
@@ -35,6 +37,8 @@ class _SignupPasswordFormState extends State<SignupPasswordForm>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    final _signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
 
     return SafeArea(
       child: CustomScrollView(
@@ -148,7 +152,13 @@ class _SignupPasswordFormState extends State<SignupPasswordForm>
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: _isFormValid ? widget.onContinue : null,
+                            onPressed: _isFormValid
+                                ? () {
+                                    _signupStateNotifier
+                                        .setPassword(_passwordController.text);
+                                    widget.onContinue();
+                                  }
+                                : null,
                             child: const Icon(
                               Icons.arrow_forward,
                               color: Colors.black,

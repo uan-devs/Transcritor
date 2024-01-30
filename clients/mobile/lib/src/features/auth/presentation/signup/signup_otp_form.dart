@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
+import 'package:transcritor/src/features/auth/presentation/signup/signup_controller.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_form_status_bar.dart';
 
-class SignupOTPForm extends StatefulWidget {
+class SignupOTPForm extends ConsumerStatefulWidget {
   const SignupOTPForm({
     super.key,
     required this.onContinue,
@@ -14,10 +16,10 @@ class SignupOTPForm extends StatefulWidget {
   final VoidCallback onBack;
 
   @override
-  State<SignupOTPForm> createState() => _SignupOTPFormState();
+  ConsumerState<SignupOTPForm> createState() => _SignupOTPFormState();
 }
 
-class _SignupOTPFormState extends State<SignupOTPForm>
+class _SignupOTPFormState extends ConsumerState<SignupOTPForm>
     with AutomaticKeepAliveClientMixin<SignupOTPForm> {
   final Map<int, String> _otp = {};
 
@@ -27,8 +29,7 @@ class _SignupOTPFormState extends State<SignupOTPForm>
   Widget build(BuildContext context) {
     super.build(context);
 
-    debugPrint(
-        'isFormValid: $_isFormValid | OTP: $_otp | Length: ${_otp.length}');
+    final _signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
 
     return SafeArea(
       child: CustomScrollView(
@@ -151,7 +152,13 @@ class _SignupOTPFormState extends State<SignupOTPForm>
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: _isFormValid ? () {} : null,
+                            onPressed: _isFormValid
+                                ? () {
+                                    _signupStateNotifier
+                                        .setOTP(_otp.values.join());
+                                    debugPrint('${_signupStateNotifier.data}');
+                                  }
+                                : null,
                             child: const Text(
                               'Verificar',
                               style: TextStyle(color: Colors.black),
