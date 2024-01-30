@@ -18,6 +18,7 @@ dependencies:
   go_router: ^13.0.1
   validatorless: ^1.2.3
   intl_phone_field: ^3.2.0
+  http: ^1.2.0
 
 flutter_native_splash:
   color: '#212121'
@@ -41,6 +42,9 @@ flutter:
     - assets/images/logo.png
     - assets/images/onboarding-img-01.png
     - assets/images/onboarding-img-02.png
+    - assets/images/onboarding-img-03.jpg
+    - assets/images/onboarding-img-04.jpg
+    - assets/images/onboarding-img-05.jpg
     - assets/images/correction-image.jpg
     - assets/images/recorder-image.jpg
     - assets/images/translate-image.jpg
@@ -49,3 +53,4 @@ flutter:
     - assets/images/auth-img-03.jpg
     - assets/images/auth-img-04.jpg
     - assets/images/auth-img-05.jpg
+    - assets/images/auth-img-06.jpg

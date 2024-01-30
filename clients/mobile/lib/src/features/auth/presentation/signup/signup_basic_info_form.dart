@@ -42,7 +42,7 @@ class _SignupBasicInfoFormState extends ConsumerState<SignupBasicInfoForm>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final _signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
+    final signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
 
     return SafeArea(
       child: CustomScrollView(
@@ -181,7 +181,7 @@ class _SignupBasicInfoFormState extends ConsumerState<SignupBasicInfoForm>
                         child: ElevatedButton(
                           onPressed: _isFormValid
                               ? () {
-                                  _signupStateNotifier.setBasicInfo(
+                                  signupStateNotifier.setBasicInfo(
                                     name: _nameController.text,
                                     surname: _surnameController.text,
                                     province: _provinceController.text,

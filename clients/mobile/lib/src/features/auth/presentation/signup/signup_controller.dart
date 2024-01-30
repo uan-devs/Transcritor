@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:transcritor/src/features/auth/data/transcritor_auth.dart';
 
 final signupStateNotifierProvider =
     NotifierProvider<SignupStateNotifier, SignupState>(
@@ -6,6 +7,36 @@ final signupStateNotifierProvider =
     return SignupStateNotifier();
   },
 );
+
+final signupControllerProvider = Provider<SignupController>(
+  (ref) {
+    final auth = ref.read(authTranscritorProvider);
+
+    return SignupController(
+      auth: auth,
+      ref: ref,
+    );
+  },
+);
+
+class SignupController {
+  SignupController({required this.auth, required this.ref});
+
+  final TranscritorAuth auth;
+  final ProviderRef ref;
+
+  Future<void> signup() async {
+    final signupNotifier = ref.read(signupStateNotifierProvider.notifier);
+
+    await auth.signupUser(
+      name: signupNotifier.name,
+      email: signupNotifier.email,
+      password: signupNotifier.password,
+      province: signupNotifier.province,
+      phone: signupNotifier.phone,
+    );
+  }
+}
 
 class SignupStateNotifier extends Notifier<SignupState> {
   @override
@@ -29,6 +60,12 @@ class SignupStateNotifier extends Notifier<SignupState> {
         'password': state.password,
         'otp': state.otp,
       };
+
+  String get name => '${state.name} ${state.surname}';
+  String get email => state.email;
+  String get phone => state.phone;
+  String get province => state.province;
+  String get password => state.password;
 
   void setBasicInfo({
     required String name,

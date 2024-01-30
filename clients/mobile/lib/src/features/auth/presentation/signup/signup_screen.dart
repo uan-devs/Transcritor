@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_basic_info_form.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_contact_form.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_otp_form.dart';
@@ -33,6 +34,13 @@ class _SignupScreenState extends State<SignupScreen> {
             fontSize: 24,
             fontWeight: FontWeight.w600,
           ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          color: Colors.black,
+          onPressed: () {
+            context.pop();
+          },
         ),
         elevation: 0,
         scrolledUnderElevation: 0,

@@ -29,7 +29,7 @@ class _SignupOTPFormState extends ConsumerState<SignupOTPForm>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final _signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
+    final signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
 
     return SafeArea(
       child: CustomScrollView(
@@ -154,9 +154,9 @@ class _SignupOTPFormState extends ConsumerState<SignupOTPForm>
                           ElevatedButton(
                             onPressed: _isFormValid
                                 ? () {
-                                    _signupStateNotifier
+                                    signupStateNotifier
                                         .setOTP(_otp.values.join());
-                                    debugPrint('${_signupStateNotifier.data}');
+                                    debugPrint('${signupStateNotifier.data}');
                                   }
                                 : null,
                             child: const Text(

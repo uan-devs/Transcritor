@@ -38,7 +38,7 @@ class _SignupPasswordFormState extends ConsumerState<SignupPasswordForm>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final _signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
+    final signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
 
     return SafeArea(
       child: CustomScrollView(
@@ -154,7 +154,7 @@ class _SignupPasswordFormState extends ConsumerState<SignupPasswordForm>
                           ElevatedButton(
                             onPressed: _isFormValid
                                 ? () {
-                                    _signupStateNotifier
+                                    signupStateNotifier
                                         .setPassword(_passwordController.text);
                                     widget.onContinue();
                                   }

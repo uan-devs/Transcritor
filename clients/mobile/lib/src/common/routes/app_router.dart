@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transcritor/src/features/auth/data/transcritor_auth.dart';
 import 'package:transcritor/src/features/auth/presentation/login/login_screen.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_screen.dart';
 import 'package:transcritor/src/features/home/presentation/home_screen.dart';
@@ -20,24 +21,28 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 GoRouter goRouter(ProviderRef ref) {
   final onBoardingRepository =
       ref.watch(onboardingRepositoryProvider).requireValue;
+  final auth = ref.watch(authTranscritorProvider);
 
   return GoRouter(
     initialLocation: '/onboarding',
     debugLogDiagnostics: true,
-    redirect: (state, context) {
+    redirect: (context, state) {
+      final path = state.uri.path;
+
       if (onBoardingRepository.shouldShowOnboarding()) {
         return '/onboarding';
       }
 
-      // TODO: Add logic to get the user logged in status
-      const isLoggedIn = false;
+      final isLoggedIn = auth.isAuth;
 
-      // ignore: dead_code
       if (!isLoggedIn) {
+        if (path.startsWith('/signup')) {
+          return '/signup';
+        }
+
         return '/login';
       }
 
-      // ignore: dead_code
       return null;
     },
     routes: [

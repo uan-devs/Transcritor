@@ -40,7 +40,7 @@ class _SignupContactFormState extends ConsumerState<SignupContactForm>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final _signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
+    final signupStateNotifier = ref.read(signupStateNotifierProvider.notifier);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -135,7 +135,7 @@ class _SignupContactFormState extends ConsumerState<SignupContactForm>
                             ElevatedButton(
                               onPressed: _isFormValid
                                   ? () {
-                                      _signupStateNotifier.setContactInfo(
+                                      signupStateNotifier.setContactInfo(
                                         email: _emailController.text,
                                         phone: _phoneController.text,
                                       );

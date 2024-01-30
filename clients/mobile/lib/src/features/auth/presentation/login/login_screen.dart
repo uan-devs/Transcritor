@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
           slivers: [
             SliverToBoxAdapter(
               child: Image.asset(
-                'assets/images/auth-img-03.jpg',
+                'assets/images/auth-img-06.jpg',
                 height: 300,
                 width: double.infinity,
                 fit: BoxFit.fill,
@@ -123,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               TextSpan(
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    context.goNamed(AppRoute.signup.name);
+                                    context.pushNamed(AppRoute.signup.name);
                                   },
                                 text: 'Cadastre-se',
                                 style: const TextStyle(
