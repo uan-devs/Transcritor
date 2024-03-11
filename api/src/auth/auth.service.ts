@@ -1,5 +1,9 @@
 import * as argon from 'argon2';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   LoginRequestDTO,
   LoginResponseDTO,
@@ -20,10 +24,23 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginRequestDTO): Promise<LoginResponseDTO> {
-    return {
-      access_token: dto.email,
-      refresh_token: dto.password,
-    };
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const passwordsMatches = await argon.verify(user.password, dto.password);
+
+    if (!passwordsMatches) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return this.signToken(user.id, user.email);
   }
 
   async register(dto: RegisterRequestDTO): Promise<RegisterResponseDTO> {
@@ -45,7 +62,7 @@ export class AuthService {
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new BadRequestException('Invalid credentials');
+          throw new BadRequestException('Invalid request');
         }
       }
     }
