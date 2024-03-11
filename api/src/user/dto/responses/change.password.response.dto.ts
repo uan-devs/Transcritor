@@ -1,4 +1,7 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { UserResponseDTO } from './user.response.dto';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class ChangePasswordResponseDTO extends PartialType(UserResponseDTO) {}
+export class ChangePasswordResponseDTO {
+  @IsString()
+  @IsNotEmpty()
+  message: string;
+}

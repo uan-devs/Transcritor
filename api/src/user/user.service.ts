@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import * as argon from 'argon2';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ChangePasswordDTO,
@@ -12,9 +17,24 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async editUser(id: number, dto: EditUserDTO): Promise<EditUserResponseDTO> {
+    const date = dto.dateOfBirth ? new Date(dto.dateOfBirth) : null;
+
+    delete dto.dateOfBirth;
+
+    const user = await this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        dateOfBirth: date ? new Date(date.toISOString()) : null,
+        ...dto,
+      },
+    });
+
+    delete user.password;
+
     return {
-      id,
-      ...dto,
+      ...user,
     };
   }
 
@@ -22,9 +42,40 @@ export class UserService {
     id: number,
     dto: ChangePasswordDTO,
   ): Promise<ChangePasswordResponseDTO> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    const correctPassword = await argon.verify(
+      user.password,
+      dto.currentPassword,
+    );
+
+    if (!correctPassword) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const samePassword = await argon.verify(user.password, dto.newPassword);
+
+    if (samePassword) {
+      throw new BadRequestException('Invalid request');
+    }
+
+    const hash = await argon.hash(dto.newPassword);
+
+    await this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        password: hash,
+      },
+    });
+
     return {
-      id: id,
-      ...dto,
+      message: 'Password changed successfully',
     };
   }
 }
