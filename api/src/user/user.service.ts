@@ -11,10 +11,14 @@ import {
   EditUserDTO,
   EditUserResponseDTO,
 } from './dto';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private firebase: FirebaseService,
+  ) {}
 
   async editUser(id: number, dto: EditUserDTO): Promise<EditUserResponseDTO> {
     const date = dto.dateOfBirth ? new Date(dto.dateOfBirth) : null;
@@ -77,5 +81,21 @@ export class UserService {
     return {
       message: 'Password changed successfully',
     };
+  }
+
+  async updatePhoto(id: number, file: Express.Multer.File) {
+    const url = await this.firebase.uploadImage(file);
+    const user = await this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        profileImage: url,
+      },
+    });
+
+    delete user.password;
+
+    return { ...user };
   }
 }
