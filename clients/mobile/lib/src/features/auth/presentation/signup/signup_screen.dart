@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_basic_info_form.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_contact_form.dart';
-import 'package:transcritor/src/features/auth/presentation/signup/signup_otp_form.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_password_form.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -79,33 +78,9 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           // Page 3: Password
           SignupPasswordForm(
-            onContinue: () {
-              _pageController.animateToPage(
-                3,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-              );
-            },
             onBack: () {
               _pageController.animateToPage(
                 1,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-              );
-            },
-          ),
-          // Page 4: OTP
-          SignupOTPForm(
-            onContinue: () {
-              _pageController.animateToPage(
-                4,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-              );
-            },
-            onBack: () {
-              _pageController.animateToPage(
-                2,
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeInOut,
               );
