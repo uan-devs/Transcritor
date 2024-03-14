@@ -73,5 +73,26 @@ ThemeData darkTheme() {
       thumbColor: MaterialStatePropertyAll(MyColors.grey),
       trackColor: MaterialStatePropertyAll(Color(0xFF344047)),
     ),
+    inputDecorationTheme: InputDecorationTheme(
+      isDense: true,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
   );
 }
+
+/**
+ * InputDecoration(
+    labelText: 'Nome',
+    prefixIcon: const Icon(Icons.person),
+    suffixIcon: IconButton(
+    icon: const Icon(Icons.close_rounded),
+    onPressed: () {},
+    ),
+    isDense: true,
+    border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    ),
+    )
+ */

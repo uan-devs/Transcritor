@@ -1,9 +1,21 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:transcritor/src/common/exceptions/auth_exception.dart';
 import 'package:transcritor/src/common/models/user.dart';
 
 abstract class AuthRepository {
   Future<Either<AuthException, User?>> getCurrentUserInfo();
+
+  Future<Either<AuthException, User?>> editUserInfo({
+    required String? firstName,
+    required String? lastName,
+    required String? birthDate,
+  });
+
+  Future<Either<AuthException, User?>> editProfileImage({
+    required File image,
+  });
 
   Future<Either<AuthException, void>> signInWithEmailAndPassword({
     required String email,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -46,40 +47,118 @@ final class RestClient {
     _headers['Authorization'] = 'Bearer $accessToken';
   }
 
-  Future<http.Response> postRequest(
-      String path, Map<String, Object> body) async {
+  Future<http.Response> deleteRequest({
+    required String path,
+    Map<String, String>? headers,
+  }) async {
     if (_isAuth) {
       await _authenticateRequest();
     }
+
+    final headersCopy = Map<String, String>.from(_headers);
+
+    if (headers != null) headersCopy.addAll(headers);
+
+    return await http.delete(
+      Uri.parse('$_baseUrl$path'),
+      headers: headersCopy,
+    );
+  }
+
+  Future<http.Response> postRequest({
+    required String path,
+    required Map<String, Object> body,
+    Map<String, String>? headers,
+  }) async {
+    if (_isAuth) {
+      await _authenticateRequest();
+    }
+
+    final headersCopy = Map<String, String>.from(_headers);
+
+    if (headers != null) headersCopy.addAll(headers);
 
     return await http.post(
       Uri.parse('$_baseUrl$path'),
       body: jsonEncode(body),
-      headers: _headers,
+      headers: headersCopy,
     );
   }
 
-  Future<http.Response> getRequest(String path) async {
+  Future<http.Response> getRequest({
+    required String path,
+    Map<String, String>? headers,
+  }) async {
     if (_isAuth) {
       await _authenticateRequest();
     }
+
+    final headersCopy = Map<String, String>.from(_headers);
+
+    if (headers != null) headersCopy.addAll(headers);
 
     return await http.get(
       Uri.parse('$_baseUrl$path'),
-      headers: _headers,
+      headers: headersCopy,
     );
   }
 
-  Future<http.Response> patchRequest(
-      String path, Map<String, Object> body) async {
+  Future<http.Response> patchRequest({
+    required String path,
+    required Map<String, Object> body,
+    Map<String, String>? headers,
+  }) async {
     if (_isAuth) {
       await _authenticateRequest();
     }
 
+    final headersCopy = Map<String, String>.from(_headers);
+
+    if (headers != null) headersCopy.addAll(headers);
+
     return await http.patch(
       Uri.parse('$_baseUrl$path'),
-      body: body,
-      headers: _headers,
+      body: jsonEncode(body),
+      headers: headersCopy,
     );
+  }
+
+  Future<http.Response> sendFile({
+    required String path,
+    required String fieldName,
+    required File file,
+    required String method,
+    Map<String, String>? headers,
+  }) async {
+    if (_isAuth) {
+      await _authenticateRequest();
+    }
+
+    final headersCopy = Map<String, String>.from(_headers);
+
+    if (headers != null) headersCopy.addAll(headers);
+
+    headersCopy.remove('Content-Type');
+
+    final stream = http.ByteStream(file.openRead());
+    stream.cast();
+
+    final length = await file.length();
+
+    final request = http.MultipartRequest(method, Uri.parse('$_baseUrl$path'));
+    request.headers.addAll(headersCopy);
+
+    final multipart = http.MultipartFile(
+      fieldName,
+      stream,
+      length,
+      filename: file.path.split('/').last,
+    );
+
+    request.files.add(multipart);
+
+    final response = await request.send();
+
+    return await http.Response.fromStream(response);
   }
 }

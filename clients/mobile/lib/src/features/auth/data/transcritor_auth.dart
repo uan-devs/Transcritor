@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transcritor/src/common/api/rest_client.dart';
 import 'package:transcritor/src/common/constants/storage_keys.dart';
 import 'package:transcritor/src/common/constants/urls.dart';
 import 'package:transcritor/src/common/exceptions/auth_exception.dart';
+import 'package:transcritor/src/common/extensions/custom_string_extension.dart';
 import 'package:transcritor/src/common/models/user.dart';
 import 'package:transcritor/src/common/storage/normal/normal_storage_impl.dart';
 import 'package:transcritor/src/common/storage/secure/secure_storage_impl.dart';
@@ -32,10 +35,11 @@ class TranscritorAuth implements AuthRepository {
   final Storage secureStorage;
   final Storage normalStorage;
 
-  TranscritorAuth(
-      {required this.client,
-      required this.secureStorage,
-      required this.normalStorage,}) {
+  TranscritorAuth({
+    required this.client,
+    required this.secureStorage,
+    required this.normalStorage,
+  }) {
     _userStream.stream.listen((event) {
       _user = event;
     });
@@ -74,8 +78,8 @@ class TranscritorAuth implements AuthRepository {
 
           if (now.isBefore(refreshTokenExpires)) {
             final response = await client.unAuth.postRequest(
-              UrlsConstants.refreshTokenUrl,
-              {
+              path: UrlsConstants.refreshTokenUrl,
+              body: {
                 'refresh_token': refreshToken,
               },
             );
@@ -83,7 +87,8 @@ class TranscritorAuth implements AuthRepository {
             if (response.statusCode == 200) {
               final body = jsonDecode(response.body);
 
-              if (body['access_token'] != null && body['refresh_token'] != null) {
+              if (body['access_token'] != null &&
+                  body['refresh_token'] != null) {
                 await Future.wait([
                   secureStorage.store(
                     StorageKeys.accessToken,
@@ -129,7 +134,8 @@ class TranscritorAuth implements AuthRepository {
   @override
   Future<Either<AuthException, User?>> getCurrentUserInfo() async {
     try {
-      final response = await client.auth.getRequest(UrlsConstants.userInfoUrl);
+      final response =
+          await client.auth.getRequest(path: UrlsConstants.userInfoUrl);
 
       switch (response.statusCode) {
         case 400:
@@ -175,8 +181,8 @@ class TranscritorAuth implements AuthRepository {
   }) async {
     try {
       final response = await client.unAuth.postRequest(
-        UrlsConstants.loginUrl,
-        {
+        path: UrlsConstants.loginUrl,
+        body: {
           'email': email,
           'password': password,
         },
@@ -184,11 +190,18 @@ class TranscritorAuth implements AuthRepository {
 
       switch (response.statusCode) {
         case 400:
+          debugPrint(
+              'response: ${jsonDecode(response.body)} - ${response.statusCode}');
           return Left(AuthException(key: 'BAD_REQUEST'));
         case 401:
+          debugPrint(
+              'response: ${jsonDecode(response.body)} - ${response.statusCode}');
           return Left(AuthException(key: 'INVALID_CREDENTIALS'));
         case 200:
           final body = jsonDecode(response.body);
+
+          debugPrint(
+              'response: ${jsonDecode(response.body)} - ${response.statusCode}');
 
           if (body['access_token'] != null && body['refresh_token'] != null) {
             await Future.wait([
@@ -251,8 +264,8 @@ class TranscritorAuth implements AuthRepository {
   }) async {
     try {
       final response = await client.unAuth.postRequest(
-        UrlsConstants.registerUrl,
-        {
+        path: UrlsConstants.registerUrl,
+        body: {
           'firstName': firstName,
           'lastName': lastName,
           'email': email,
@@ -301,6 +314,166 @@ class TranscritorAuth implements AuthRepository {
           return Left(AuthException(key: 'SERVER_DOWN'));
       }
     } catch (e) {
+      return Left(AuthException(key: e.toString()));
+    }
+  }
+
+  Future<Either<AuthException, User?>> editUser({
+    required String? firstName,
+    required String? lastName,
+    required String? birthDate,
+    required File? image,
+  }) async {
+    if (firstName == null &&
+        lastName == null &&
+        birthDate == null &&
+        image == null) {
+      return Right(_user);
+    }
+
+    if (image == null) {
+      debugPrint('editUserInfo');
+      return await editUserInfo(
+        firstName: firstName,
+        lastName: lastName,
+        birthDate: birthDate,
+      );
+    }
+
+    if (firstName == null && lastName == null && birthDate == null) {
+      return await editProfileImage(
+        image: image,
+      );
+    }
+
+    await editProfileImage(image: image);
+
+    return await editUserInfo(
+      firstName: firstName,
+      lastName: lastName,
+      birthDate: birthDate,
+    );
+  }
+
+  @override
+  Future<Either<AuthException, User?>> editProfileImage({
+    required File image,
+  }) async {
+    try {
+      final response = await client.auth.sendFile(
+        path: UrlsConstants.editUserProfilePhotoUrl,
+        file: image,
+        fieldName: 'photo',
+        method: 'PATCH',
+      );
+
+      debugPrint('request feito ${response.statusCode} - ${response.body}');
+
+      switch (response.statusCode) {
+        case 400:
+          return Left(AuthException(key: 'BAD_REQUEST'));
+        case 401:
+          return Left(AuthException(key: 'INVALID_CREDENTIALS'));
+        case 403:
+          return Left(AuthException(key: 'OPERATION_NOT_ALLOWED'));
+        case 200:
+          late User? apiUser;
+
+          try {
+            apiUser = User.fromJson(response.body);
+          } catch (e) {
+            return Left(AuthException(key: 'BAD_RESPONSE'));
+          }
+
+          await normalStorage.store(
+            StorageKeys.userInfo,
+            apiUser.toJson(),
+          );
+
+          _userStream.sink.add(apiUser);
+
+          return Right(apiUser);
+        default:
+          return Left(AuthException(key: 'SERVER_DOWN'));
+      }
+    } catch (e) {
+      return Left(AuthException(key: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AuthException, User?>> editUserInfo({
+    required String? firstName,
+    required String? lastName,
+    required String? birthDate,
+  }) async {
+    if (firstName.isEmptyOrNull &&
+        lastName.isEmptyOrNull &&
+        birthDate.isEmptyOrNull) {
+      return Right(_user);
+    }
+
+    if (firstName == _user?.firstName &&
+        lastName == _user?.lastName &&
+        (birthDate == _user?.dateOfBirth || birthDate.isEmptyOrNull)) {
+      return Right(_user);
+    }
+
+    final Map<String, Object> body = {};
+
+    (firstName.isEmptyOrNull || firstName == _user?.firstName)
+        ? null
+        : body['firstName'] = firstName!;
+    (lastName.isEmptyOrNull || lastName == _user?.lastName)
+        ? null
+        : body['lastName'] = lastName!;
+    (birthDate.isEmptyOrNull || birthDate == _user?.dateOfBirth)
+        ? null
+        : body['dateOfBirth'] = birthDate!;
+
+    try {
+      final response = await client.auth.patchRequest(
+        path: UrlsConstants.editUserInfoUrl,
+        body: body,
+      );
+
+      debugPrint('request feito ${response.statusCode} with body: $body');
+
+      switch (response.statusCode) {
+        case 400:
+          debugPrint(response.body);
+          return Left(AuthException(key: 'BAD_REQUEST'));
+        case 401:
+          debugPrint(response.body);
+          return Left(AuthException(key: 'INVALID_CREDENTIALS'));
+        case 403:
+          debugPrint(response.body);
+          return Left(AuthException(key: 'OPERATION_NOT_ALLOWED'));
+        case 200:
+          debugPrint(response.body);
+          late User? apiUser;
+
+          try {
+            apiUser = User.fromJson(response.body);
+          } catch (e) {
+            debugPrint(e.toString());
+            return Left(AuthException(key: 'BAD_RESPONSE'));
+          }
+
+          await normalStorage.store(
+            StorageKeys.userInfo,
+            apiUser.toJson(),
+          );
+
+          _userStream.sink.add(apiUser);
+
+          return Right(apiUser);
+        default:
+          debugPrint(response.body);
+          return Left(AuthException(key: 'SERVER_DOWN'));
+      }
+    } catch (e) {
+      debugPrint(e.toString());
       return Left(AuthException(key: e.toString()));
     }
   }

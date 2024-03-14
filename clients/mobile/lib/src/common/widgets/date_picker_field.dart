@@ -4,17 +4,17 @@ class DatePickerField extends StatefulWidget {
   const DatePickerField({
     super.key,
     this.label,
-    required this.initialDate,
-    required this.minimumDate,
-    required this.maximumDate,
+    this.initialDate,
+    this.minimumDate,
+    this.maximumDate,
     this.enable = true,
     this.onChanged,
   });
 
   final String? label;
-  final DateTime initialDate;
-  final DateTime minimumDate;
-  final DateTime maximumDate;
+  final DateTime? initialDate;
+  final DateTime? minimumDate;
+  final DateTime? maximumDate;
   final bool enable;
   final ValueChanged<DateTime>? onChanged;
 
@@ -28,7 +28,9 @@ class _DatePickerFieldState extends State<DatePickerField> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate;
+    _selectedDate = widget.initialDate ?? DateTime(
+      DateTime.now().year - 28,
+    );
   }
 
   @override
@@ -39,6 +41,9 @@ class _DatePickerFieldState extends State<DatePickerField> {
       ),
       readOnly: true,
       enabled: widget.enable,
+      onTapOutside: (_) => FocusScope.of(context).unfocus(),
+      onFieldSubmitted: (_) => setState(() {}),
+      textInputAction: TextInputAction.done,
       decoration: InputDecoration(
         labelText: widget.label,
         prefixIcon: const Icon(Icons.calendar_today),
@@ -57,8 +62,12 @@ class _DatePickerFieldState extends State<DatePickerField> {
               final DateTime? picked = await showDatePicker(
                 context: context,
                 initialDate: _selectedDate,
-                firstDate: widget.minimumDate,
-                lastDate: widget.maximumDate,
+                firstDate: widget.minimumDate ?? DateTime(
+                  DateTime.now().year - 100,
+                ),
+                lastDate: widget.maximumDate ?? DateTime(
+                  DateTime.now().year - 18,
+                ),
               );
               if (picked != null && picked != _selectedDate) {
                 widget.onChanged?.call(picked);
