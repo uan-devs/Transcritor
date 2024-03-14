@@ -1,15 +1,26 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transcritor/src/common/routes/go_router_refresh_stream.dart';
+import 'package:transcritor/src/common/routes/scaffold_with_nested_navigation.dart';
 import 'package:transcritor/src/features/auth/data/transcritor_auth.dart';
 import 'package:transcritor/src/features/auth/presentation/login/login_screen.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_screen.dart';
 import 'package:transcritor/src/features/home/presentation/home_screen.dart';
 import 'package:transcritor/src/features/onboarding/data/onboarding_repository.dart';
 import 'package:transcritor/src/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:transcritor/src/features/settings/settings_screen.dart';
+import 'package:transcritor/src/features/settings/user/user_profile_screen.dart';
 
-enum AppRoute {
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final _listNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
+final _settingsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'settings');
+
+enum AppRoutes {
   onboarding,
   home,
+  settings,
+  userProfile,
   login,
   signup,
 }
@@ -24,55 +35,97 @@ GoRouter goRouter(ProviderRef ref) {
   final auth = ref.watch(authTranscritorProvider);
 
   return GoRouter(
-    initialLocation: '/onboarding',
+    initialLocation: '/home',
+    navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
-    redirect: (context, state) {
+    redirect: (context, state) async {
       final path = state.uri.path;
 
       if (onBoardingRepository.shouldShowOnboarding()) {
         return '/onboarding';
       }
 
-      final isLoggedIn = auth.isAuth;
+      if (auth.user == null) {
+        await auth.autoLogin();
+      }
 
-      if (!isLoggedIn) {
-        if (path.startsWith('/signup')) {
-          return '/signup';
+      final isLoggedIn = auth.user != null;
+
+      if (isLoggedIn) {
+        if (path == '/login' || path == '/signup') {
+          return '/home';
         }
-
-        return '/login';
+      } else {
+        if (path != '/login' && path != '/signup') {
+          return '/login';
+        }
       }
 
       return null;
     },
+    refreshListenable: GoRouterRefreshStream(auth.onAuthStateChanged()),
     routes: [
       GoRoute(
         path: '/onboarding',
-        name: AppRoute.onboarding.name,
+        name: AppRoutes.onboarding.name,
         pageBuilder: (context, state) => const NoTransitionPage(
           child: OnboardingScreen(),
         ),
       ),
       GoRoute(
-        path: '/home',
-        name: AppRoute.home.name,
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: HomeScreen(),
-        ),
-      ),
-      GoRoute(
         path: '/login',
-        name: AppRoute.login.name,
+        name: AppRoutes.login.name,
         pageBuilder: (context, state) => const NoTransitionPage(
           child: LoginScreen(),
         ),
       ),
       GoRoute(
         path: '/signup',
-        name: AppRoute.signup.name,
+        name: AppRoutes.signup.name,
         pageBuilder: (context, state) => const NoTransitionPage(
           child: SignupScreen(),
         ),
+      ),
+
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: _listNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/home',
+                name: AppRoutes.home.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: HomeScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _settingsNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/settings',
+                name: AppRoutes.settings.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: SettingsScreen(),
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'profile',
+                    name: AppRoutes.userProfile.name,
+                    pageBuilder: (context, state) => const NoTransitionPage(
+                      child: UserProfileScreen(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

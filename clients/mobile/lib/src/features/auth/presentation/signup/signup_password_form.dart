@@ -8,11 +8,9 @@ import 'package:validatorless/validatorless.dart';
 class SignupPasswordForm extends ConsumerStatefulWidget {
   const SignupPasswordForm({
     super.key,
-    required this.onContinue,
     required this.onBack,
   });
 
-  final VoidCallback onContinue;
   final VoidCallback onBack;
 
   @override
@@ -24,6 +22,7 @@ class _SignupPasswordFormState extends ConsumerState<SignupPasswordForm>
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool isLoading = false;
 
   bool get _isFormValid => _formKey.currentState?.validate() ?? false;
 
@@ -71,7 +70,7 @@ class _SignupPasswordFormState extends ConsumerState<SignupPasswordForm>
               margin: const EdgeInsets.only(top: 16),
               child: const Center(
                 child: SignupFormStatusBar(
-                  indexCount: 4,
+                  indexCount: 3,
                   currentIndex: 2,
                 ),
               ),
@@ -84,89 +83,101 @@ class _SignupPasswordFormState extends ConsumerState<SignupPasswordForm>
               child: Container(
                 margin: const EdgeInsets.only(top: 40),
                 width: MediaQuery.sizeOf(context).width * 0.8,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _passwordController,
-                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.next,
-                        obscureText: true,
-                        validator: Validatorless.multiple([
-                          Validatorless.required('Senha é obrigatória'),
-                          Validatorless.min(
-                              6, 'Senha deve ter no mínimo 6 caracteres'),
-                          Validatorless.regex(
-                            RegExp(
-                              r'^(?=.*?[0-9])(?=.*?[^\w\s]).{6,}$',
+                child: Visibility(
+                  visible: !isLoading,
+                  replacement: const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _passwordController,
+                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                          onFieldSubmitted: (_) => setState(() {}),
+                          keyboardType: TextInputType.text,
+                          textInputAction: TextInputAction.next,
+                          obscureText: true,
+                          validator: Validatorless.multiple([
+                            Validatorless.required('Senha é obrigatória'),
+                            Validatorless.min(
+                                6, 'Senha deve ter no mínimo 6 caracteres'),
+                            Validatorless.regex(
+                              RegExp(
+                                r'^(?=.*?[0-9])(?=.*?[^\w\s]).{6,}$',
+                              ),
+                              'Senha deve conter 1 número e 1 caractere especial',
                             ),
-                            'Senha deve conter 1 número e 1 caractere especial',
-                          ),
-                        ]),
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.lock),
-                          prefixIconColor: MyColors.green,
-                          isDense: true,
-                          labelText: 'Senha',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                          ]),
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.lock),
+                            prefixIconColor: MyColors.green,
+                            isDense: true,
+                            labelText: 'Senha',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      TextFormField(
-                        controller: _confirmPasswordController,
-                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.done,
-                        obscureText: true,
-                        validator: Validatorless.multiple([
-                          Validatorless.required(
-                              'Confirmação de senha é obrigatória'),
-                          Validatorless.compare(
-                            _passwordController,
-                            'Senhas não conferem',
-                          ),
-                        ]),
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.lock),
-                          prefixIconColor: MyColors.green,
-                          isDense: true,
-                          labelText: 'Confirme sua senha',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                        const SizedBox(height: 24),
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                          onFieldSubmitted: (_) => setState(() {}),
+                          keyboardType: TextInputType.text,
+                          textInputAction: TextInputAction.done,
+                          obscureText: true,
+                          validator: Validatorless.multiple([
+                            Validatorless.required(
+                                'Confirmação de senha é obrigatória'),
+                            Validatorless.compare(
+                              _passwordController,
+                              'Senhas não conferem',
+                            ),
+                          ]),
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.lock),
+                            prefixIconColor: MyColors.green,
+                            isDense: true,
+                            labelText: 'Confirme sua senha',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ElevatedButton(
-                            onPressed: widget.onBack,
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.black,
+                        const Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ElevatedButton(
+                              onPressed: widget.onBack,
+                              child: const Icon(
+                                Icons.arrow_back,
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                          ElevatedButton(
-                            onPressed: _isFormValid
-                                ? () {
-                                    signupStateNotifier
-                                        .setPassword(_passwordController.text);
-                                    widget.onContinue();
-                                  }
-                                : null,
-                            child: const Icon(
-                              Icons.arrow_forward,
-                              color: Colors.black,
+                            ElevatedButton(
+                              onPressed: _isFormValid
+                                  ? () async {
+                                signupStateNotifier
+                                    .setPassword(_passwordController.text);
+
+                                setState(() => isLoading = true);
+
+                                await ref
+                                    .read(signupControllerProvider)
+                                    .signup(context);
+
+                                setState(() => isLoading = false);
+                              }
+                                  : null,
+                              child: const Text('Criar conta'),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

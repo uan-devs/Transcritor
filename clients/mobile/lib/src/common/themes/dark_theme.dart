@@ -14,10 +14,10 @@ ThemeData darkTheme() {
     scaffoldBackgroundColor: MyColors.black87,
     extensions: [CustomThemeExtension.darkMode],
     appBarTheme: const AppBarTheme(
-      backgroundColor: MyColors.grey600,
+      backgroundColor: Colors.transparent,
       titleTextStyle: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
         color: Colors.white,
       ),
       systemOverlayStyle: SystemUiOverlayStyle(
@@ -29,7 +29,7 @@ ThemeData darkTheme() {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: MyColors.green,
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.black,
         splashFactory: NoSplash.splashFactory,
         elevation: 0,
         shadowColor: Colors.transparent,
@@ -52,15 +52,47 @@ ThemeData darkTheme() {
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: MyColors.green,
-      foregroundColor: Colors.white,
+      foregroundColor: Colors.black,
     ),
-    listTileTheme: const ListTileThemeData(
-      iconColor: Colors.white,
-      tileColor: MyColors.grey,
+    listTileTheme: ListTileThemeData(
+      iconColor: MyColors.green,
+      tileColor: Colors.grey.withOpacity(.2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      titleTextStyle: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.normal,
+      ),
+      subtitleTextStyle: const TextStyle(
+        fontSize: 12,
+        color: MyColors.grey,
+      ),
     ),
     switchTheme: const SwitchThemeData(
       thumbColor: MaterialStatePropertyAll(MyColors.grey),
       trackColor: MaterialStatePropertyAll(Color(0xFF344047)),
     ),
+    inputDecorationTheme: InputDecorationTheme(
+      isDense: true,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
   );
 }
+
+/**
+ * InputDecoration(
+    labelText: 'Nome',
+    prefixIcon: const Icon(Icons.person),
+    suffixIcon: IconButton(
+    icon: const Icon(Icons.close_rounded),
+    onPressed: () {},
+    ),
+    isDense: true,
+    border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    ),
+    )
+ */

@@ -1,4 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:transcritor/src/common/widgets/adptative_widgets.dart';
 import 'package:transcritor/src/features/auth/data/transcritor_auth.dart';
 
 final signupStateNotifierProvider =
@@ -25,15 +28,41 @@ class SignupController {
   final TranscritorAuth auth;
   final ProviderRef ref;
 
-  Future<void> signup() async {
+  Future<void> signup(BuildContext context) async {
     final signupNotifier = ref.read(signupStateNotifierProvider.notifier);
 
-    await auth.signupUser(
-      name: signupNotifier.name,
+    final result = await auth.signUp(
+      firstName: signupNotifier.name,
+      lastName: signupNotifier.surname,
       email: signupNotifier.email,
       password: signupNotifier.password,
       province: signupNotifier.province,
-      phone: signupNotifier.phone,
+    );
+
+    result.fold(
+          (exception) {
+        if (context.mounted) {
+          showAdaptiveDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog.adaptive(
+                title: const Text('An error occur'),
+                content: Text(exception.toString()),
+                actions: [
+                  AdaptiveWidgets.adaptiveAction(
+                      context: context,
+                      onPressed: () {
+                        if (context.canPop()) context.pop();
+                      },
+                      child: const Text('Ok')
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      },
+          (success) => null,
     );
   }
 }
@@ -48,22 +77,19 @@ class SignupStateNotifier extends Notifier<SignupState> {
     return state.name.isNotEmpty &&
         state.surname.isNotEmpty &&
         state.email.isNotEmpty &&
-        state.phone.isNotEmpty &&
-        state.password.isNotEmpty &&
-        state.otp.isNotEmpty;
+        state.password.isNotEmpty;
   }
 
   Map<String, String> get data => {
-        'name': '${state.name} ${state.surname}',
+        'name': state.name,
+        'surname': state.surname,
         'email': state.email,
-        'phone': state.phone,
         'password': state.password,
-        'otp': state.otp,
       };
 
-  String get name => '${state.name} ${state.surname}';
+  String get name => state.name;
+  String get surname => state.surname;
   String get email => state.email;
-  String get phone => state.phone;
   String get province => state.province;
   String get password => state.password;
 
@@ -77,17 +103,12 @@ class SignupStateNotifier extends Notifier<SignupState> {
     state.province = province;
   }
 
-  void setContactInfo({required String email, required String phone}) {
+  void setContactInfo({required String email}) {
     state.email = email;
-    state.phone = phone;
   }
 
   void setPassword(String password) {
     state.password = password;
-  }
-
-  void setOTP(String otp) {
-    state.otp = otp;
   }
 
   void reset() {
@@ -100,7 +121,5 @@ class SignupState {
   String surname = '';
   String email = '';
   String province = '';
-  String phone = '';
   String password = '';
-  String otp = '';
 }
