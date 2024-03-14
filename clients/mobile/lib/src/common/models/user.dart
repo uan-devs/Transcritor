@@ -2,51 +2,74 @@ import 'dart:convert';
 
 class User {
   User({
-    required this.name,
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.firstName,
+    required this.lastName,
     required this.email,
-    required this.phone,
-    required this.photoUrl,
+    required this.profileImage,
+    required this.dateOfBirth,
     required this.province,
   });
 
-  final String name;
+  final int id;
+  final String createdAt;
+  final String updatedAt;
+  final String firstName;
+  final String lastName;
   final String email;
-  final String phone;
-  final String photoUrl;
+  final String? profileImage;
+  final String? dateOfBirth;
   final String province;
 
   User copyWith({
-    String? name,
+    String? createdAt,
+    String? updatedAt,
+    String? firstName,
+    String? lastName,
     String? email,
-    String? phone,
-    String? photoUrl,
+    String? profileImage,
+    String? dateOfBirth,
     String? province,
   }) {
     return User(
-      name: name ?? this.name,
+      id: id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
       email: email ?? this.email,
-      phone: phone ?? this.phone,
-      photoUrl: photoUrl ?? this.photoUrl,
+      profileImage: profileImage ?? this.profileImage,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       province: province ?? this.province,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'name': name,
+      'id': id,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'firstName': firstName,
+      'lastName': lastName,
       'email': email,
-      'phone': phone,
-      'photoUrl': photoUrl,
+      'profileImage': profileImage,
+      'dateOfBirth': dateOfBirth,
       'province': province,
     };
   }
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
-      name: map['name'] as String,
+      id: map['id'] as int,
+      createdAt: map['createdAt'] as String,
+      updatedAt: map['updatedAt'] as String,
+      firstName: map['firstName'] as String,
+      lastName: map['lastName'] as String,
       email: map['email'] as String,
-      phone: map['phone'] as String,
-      photoUrl: map['photoUrl'] as String,
+      profileImage: map['profileImage'] as String?,
+      dateOfBirth: map['dateOfBirth'] as String?,
       province: map['province'] as String,
     );
   }
@@ -58,26 +81,26 @@ class User {
 
   @override
   String toString() {
-    return 'User(name: $name, email: $email, phone: $phone, photoUrl: $photoUrl, province: $province)';
+    return 'User(name: $firstName $lastName, email: $email, profileImage: $profileImage, province: $province)';
   }
 
   @override
   bool operator ==(covariant User other) {
     if (identical(this, other)) return true;
 
-    return other.name == name &&
+    return other.firstName == firstName &&
+        other.lastName == lastName &&
         other.email == email &&
-        other.phone == phone &&
-        other.photoUrl == photoUrl &&
+        other.profileImage == profileImage &&
         other.province == province;
   }
 
   @override
   int get hashCode {
-    return name.hashCode ^
+    return firstName.hashCode ^
+        lastName.hashCode ^
         email.hashCode ^
-        phone.hashCode ^
-        photoUrl.hashCode ^
+        profileImage.hashCode ^
         province.hashCode;
   }
 }

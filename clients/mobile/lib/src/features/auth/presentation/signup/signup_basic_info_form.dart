@@ -74,7 +74,7 @@ class _SignupBasicInfoFormState extends ConsumerState<SignupBasicInfoForm>
             child: Container(
               margin: const EdgeInsets.only(top: 16),
               child: const Center(
-                child: SignupFormStatusBar(indexCount: 4, currentIndex: 0),
+                child: SignupFormStatusBar(indexCount: 3, currentIndex: 0),
               ),
             ),
           ),
@@ -92,6 +92,7 @@ class _SignupBasicInfoFormState extends ConsumerState<SignupBasicInfoForm>
                       TextFormField(
                         controller: _nameController,
                         onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                        onFieldSubmitted: (_) => setState(() {}),
                         textInputAction: TextInputAction.next,
                         validator: Validatorless.multiple([
                           Validatorless.required('Nome é obrigatório'),
@@ -118,6 +119,7 @@ class _SignupBasicInfoFormState extends ConsumerState<SignupBasicInfoForm>
                       TextFormField(
                         controller: _surnameController,
                         onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                        onFieldSubmitted: (_) => setState(() {}),
                         textInputAction: TextInputAction.done,
                         validator: Validatorless.multiple([
                           Validatorless.required('Sobrenome é obrigatório'),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl_phone_field/countries.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_controller.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_form_status_bar.dart';
@@ -74,7 +72,7 @@ class _SignupContactFormState extends ConsumerState<SignupContactForm>
               child: Container(
                 margin: const EdgeInsets.only(top: 16),
                 child: const Center(
-                  child: SignupFormStatusBar(indexCount: 4, currentIndex: 1),
+                  child: SignupFormStatusBar(indexCount: 3, currentIndex: 1),
                 ),
               ),
             ),
@@ -91,8 +89,10 @@ class _SignupContactFormState extends ConsumerState<SignupContactForm>
                       children: [
                         TextFormField(
                           controller: _emailController,
+                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                          onFieldSubmitted: (_) => setState(() {}),
                           keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
+                          textInputAction: TextInputAction.done,
                           validator: Validatorless.multiple([
                             Validatorless.required('Email obrigatório'),
                             Validatorless.email('Email inválido'),
@@ -106,20 +106,6 @@ class _SignupContactFormState extends ConsumerState<SignupContactForm>
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        IntlPhoneField(
-                          controller: _phoneController,
-                          countries: [
-                            countries.firstWhere((c) => c.code == 'AO'),
-                          ],
-                          decoration: InputDecoration(
-                            isDense: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          languageCode: "pt",
                         ),
                         const Spacer(),
                         Row(
@@ -137,7 +123,6 @@ class _SignupContactFormState extends ConsumerState<SignupContactForm>
                                   ? () {
                                       signupStateNotifier.setContactInfo(
                                         email: _emailController.text,
-                                        phone: _phoneController.text,
                                       );
                                       widget.onContinue();
                                     }
