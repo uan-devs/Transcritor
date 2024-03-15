@@ -167,7 +167,26 @@ describe('App (e2e)', () => {
           .expectStatus(200)
           .expectBodyContains('access_token')
           .expectBodyContains('refresh_token')
-          .stores('userAt', 'access_token');
+          .stores('userAt', 'access_token')
+          .stores('userRt', 'refresh_token');
+      });
+    });
+
+    describe('Refresh token endpoint', () => {
+      const endpoint = '/auth/refresh-token';
+
+      it('Should return a 401 status code if the request is unauthorized', () => {
+        return pactum.spec().get(endpoint).expectStatus(401);
+      });
+
+      it('Should return a 200 status code if the request is authorized', () => {
+        return pactum
+          .spec()
+          .get(endpoint)
+          .withBearerToken('$S{userRt}')
+          .expectStatus(200)
+          .expectBodyContains('access_token')
+          .expectBodyContains('refresh_token');
       });
     });
   });
