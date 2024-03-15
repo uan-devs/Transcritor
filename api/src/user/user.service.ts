@@ -84,6 +84,14 @@ export class UserService {
   }
 
   async updatePhoto(id: number, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('Invalid file');
+    }
+
+    if (!file.mimetype.includes('image')) {
+      throw new BadRequestException('Invalid file type');
+    }
+
     const url = await this.firebase.uploadImage(file);
     const user = await this.prisma.user.update({
       where: {
