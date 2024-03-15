@@ -24,6 +24,7 @@ dependencies:
   adaptive_action_sheet: ^2.0.3
   image_picker: ^1.0.7
   path_provider: ^2.1.2
+  faker: ^2.1.0
 
 flutter_native_splash:
   color: '#212121'
