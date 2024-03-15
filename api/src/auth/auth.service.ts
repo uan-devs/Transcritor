@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { RefreshTokenResponseDTO } from './dto/responses/refresh-token.response.dto';
 
 @Injectable()
 export class AuthService {
@@ -66,6 +67,20 @@ export class AuthService {
         }
       }
     }
+  }
+
+  async refreshToken(id: number): Promise<RefreshTokenResponseDTO> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return this.signToken(user.id, user.email);
   }
 
   private async signToken(
