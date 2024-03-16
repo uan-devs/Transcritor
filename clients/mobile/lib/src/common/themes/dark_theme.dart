@@ -14,6 +14,7 @@ ThemeData darkTheme() {
     scaffoldBackgroundColor: MyColors.black87,
     extensions: [CustomThemeExtension.darkMode],
     appBarTheme: const AppBarTheme(
+      centerTitle: false,
       backgroundColor: Colors.transparent,
       titleTextStyle: TextStyle(
         fontSize: 24,

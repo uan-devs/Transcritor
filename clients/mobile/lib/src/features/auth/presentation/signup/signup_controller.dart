@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transcritor/src/common/routes/app_router.dart';
 import 'package:transcritor/src/common/widgets/adptative_widgets.dart';
 import 'package:transcritor/src/features/auth/data/transcritor_auth.dart';
 
@@ -40,7 +41,7 @@ class SignupController {
     );
 
     result.fold(
-          (exception) {
+      (exception) {
         if (context.mounted) {
           showAdaptiveDialog(
             context: context,
@@ -54,15 +55,18 @@ class SignupController {
                       onPressed: () {
                         if (context.canPop()) context.pop();
                       },
-                      child: const Text('Ok')
-                  ),
+                      child: const Text('Ok')),
                 ],
               );
             },
           );
         }
       },
-          (success) => null,
+      (success) {
+        if (context.mounted) {
+          context.goNamed(AppRoutes.home.name);
+        }
+      },
     );
   }
 }
@@ -88,9 +92,13 @@ class SignupStateNotifier extends Notifier<SignupState> {
       };
 
   String get name => state.name;
+
   String get surname => state.surname;
+
   String get email => state.email;
+
   String get province => state.province;
+
   String get password => state.password;
 
   void setBasicInfo({

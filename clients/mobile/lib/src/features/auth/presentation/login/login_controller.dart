@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transcritor/src/common/routes/app_router.dart';
 import 'package:transcritor/src/common/widgets/adptative_widgets.dart';
 import 'package:transcritor/src/features/auth/data/transcritor_auth.dart';
 
@@ -52,7 +53,11 @@ class LoginController {
           );
         }
       },
-          (success) => null,
+          (success) {
+            if (context.mounted) {
+              context.goNamed(AppRoutes.home.name);
+            }
+          },
     );
   }
 }
