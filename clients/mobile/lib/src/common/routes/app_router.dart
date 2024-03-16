@@ -25,6 +25,43 @@ enum AppRoutes {
   signup,
 }
 
+CustomTransitionPage _customFadeTransitionPage<T>({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+  );
+}
+
+CustomTransitionPage _customSlideTransitionPage<T>({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(1, 0),
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
+      );
+    },
+  );
+}
+
 final goRouterProvider = Provider<GoRouter>((ref) {
   return goRouter(ref);
 });
@@ -68,8 +105,10 @@ GoRouter goRouter(ProviderRef ref) {
       GoRoute(
         path: '/onboarding',
         name: AppRoutes.onboarding.name,
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: OnboardingScreen(),
+        pageBuilder: (context, state) => _customFadeTransitionPage(
+          context: context,
+          state: state,
+          child: const OnboardingScreen(),
         ),
       ),
       GoRoute(
@@ -86,7 +125,6 @@ GoRouter goRouter(ProviderRef ref) {
           child: SignupScreen(),
         ),
       ),
-
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
@@ -117,8 +155,10 @@ GoRouter goRouter(ProviderRef ref) {
                   GoRoute(
                     path: 'profile',
                     name: AppRoutes.userProfile.name,
-                    pageBuilder: (context, state) => const NoTransitionPage(
-                      child: UserProfileScreen(),
+                    pageBuilder: (context, state) => _customSlideTransitionPage(
+                      context: context,
+                      state: state,
+                      child: const UserProfileScreen(),
                     ),
                   ),
                 ],
