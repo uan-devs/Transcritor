@@ -1,5 +1,5 @@
 sealed class UrlsConstants {
-  static const String baseURL = 'http://10.0.2.2:3000';
+  static const String baseURL = String.fromEnvironment('BASE_URL');
   static const String registerUrl = '/auth/register';
   static const String loginUrl = '/auth/login';
   static const String refreshTokenUrl = '/auth/refresh-token';
