@@ -21,6 +21,18 @@ services:
       - "9307:3306"
     networks:
       - network1
+  
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - dev-db
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - network1
 
 networks:
   network1:
