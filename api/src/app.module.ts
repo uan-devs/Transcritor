@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { TranscriptionModule } from './transcription/transcription.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     PrismaModule,
     AuthModule,
     UserModule,
+    TranscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
