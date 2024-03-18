@@ -1,6 +1,8 @@
 import {
   Controller,
+  Get,
   HttpStatus,
+  Param,
   ParseFilePipeBuilder,
   Post,
   UploadedFile,
@@ -39,5 +41,15 @@ export class TranscriptionController {
     file: Express.Multer.File,
   ) {
     return this.transcriptionService.createTranscription(userId, file);
+  }
+
+  @Get('list')
+  getAllTranscriptions(@GetUser('id') userId: number) {
+    return this.transcriptionService.getAllTranscriptions(userId);
+  }
+
+  @Get(':id')
+  getTranscription(@GetUser('id') userId: number, @Param('id') id: string) {
+    return this.transcriptionService.getTranscription(userId, parseInt(id));
   }
 }
