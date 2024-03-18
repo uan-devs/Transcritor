@@ -79,7 +79,7 @@ model Word {
 
   transcriptionId Int
   transcription   Transcription @relation(fields: [transcriptionId], references: [id])
-  initialTime     Int
-  finalTime       Int
+  initialTime     Decimal
+  finalTime       Decimal
   word            String
 }

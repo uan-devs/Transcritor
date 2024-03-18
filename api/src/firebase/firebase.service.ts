@@ -36,6 +36,14 @@ export class FirebaseService {
     );
   }
 
+  async uploadMedia(file: Express.Multer.File) {
+    const randomName = createId();
+    return await this.uploadFile(
+      file,
+      `audioFiles/${randomName}-${file.originalname.replaceAll(/\s/g, '')}`,
+    );
+  }
+
   private async uploadFile(
     file: Express.Multer.File,
     path: string,
