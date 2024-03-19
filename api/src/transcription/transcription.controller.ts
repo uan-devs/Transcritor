@@ -1,6 +1,8 @@
 import {
   Controller,
+  Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   ParseFilePipeBuilder,
@@ -51,5 +53,11 @@ export class TranscriptionController {
   @Get(':id')
   getTranscription(@GetUser('id') userId: number, @Param('id') id: string) {
     return this.transcriptionService.getTranscription(userId, parseInt(id));
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteTranscription(@GetUser('id') userId: number, @Param('id') id: string) {
+    return this.transcriptionService.deleteTranscription(userId, parseInt(id));
   }
 }

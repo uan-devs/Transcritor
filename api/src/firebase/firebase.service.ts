@@ -5,6 +5,7 @@ import {
   ref,
   getDownloadURL,
   uploadBytesResumable,
+  deleteObject,
 } from 'firebase/storage';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -26,6 +27,12 @@ export class FirebaseService {
 
     this.app = initializeApp(firebaseConfig);
     this.storage = getStorage(this.app);
+  }
+
+  async deleteFileByUrl(url: string) {
+    const storageRef = ref(this.storage, url);
+
+    await deleteObject(storageRef);
   }
 
   async uploadImage(file: Express.Multer.File) {

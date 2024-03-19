@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as speech from '@google-cloud/speech';
 import { FirebaseService } from '../firebase/firebase.service';
@@ -161,5 +162,52 @@ export class TranscriptionService {
         };
       }),
     };
+  }
+
+  async deleteTranscription(userId: number, transcriptionId: number) {
+    // Delete the multimedia, all transcriptions and all words associated with the multimedia
+
+    const transcription = await this.prisma.transcription.findFirst({
+      where: {
+        id: transcriptionId,
+        userId: userId,
+      },
+      include: {
+        multimedia: true,
+      },
+    });
+
+    // Check if the transcription exists or if the user is the owner
+
+    if (transcription === null) {
+      throw new NotFoundException('Transcription not found');
+    }
+
+    if (transcription.userId !== userId) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    await this.firebase.deleteFileByUrl(transcription.multimedia.fileUrl);
+
+    // Delete all words associated with the transcription
+    await this.prisma.word.deleteMany({
+      where: {
+        transcriptionId: transcriptionId,
+      },
+    });
+
+    // Delete all transcriptions associated with the multimedia
+    await this.prisma.transcription.deleteMany({
+      where: {
+        multimediaId: transcription.multimedia.id,
+      },
+    });
+
+    // Delete the multimedia
+    await this.prisma.multimedia.delete({
+      where: {
+        id: transcription.multimedia.id,
+      },
+    });
   }
 }
