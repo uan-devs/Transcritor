@@ -5,6 +5,7 @@ import {
   ref,
   getDownloadURL,
   uploadBytesResumable,
+  deleteObject,
 } from 'firebase/storage';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -28,11 +29,25 @@ export class FirebaseService {
     this.storage = getStorage(this.app);
   }
 
+  async deleteFileByUrl(url: string) {
+    const storageRef = ref(this.storage, url);
+
+    await deleteObject(storageRef);
+  }
+
   async uploadImage(file: Express.Multer.File) {
     const randomName = createId();
     return await this.uploadFile(
       file,
       `profileImages/${randomName}-${file.originalname.replaceAll(/\s/g, '')}`,
+    );
+  }
+
+  async uploadMedia(file: Express.Multer.File) {
+    const randomName = createId();
+    return await this.uploadFile(
+      file,
+      `audioFiles/${randomName}-${file.originalname.replaceAll(/\s/g, '')}`,
     );
   }
 

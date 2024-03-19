@@ -20,7 +20,66 @@ model User {
   lastName     String?
   dateOfBirth  DateTime?
   gender       String?
-  profileImage String? @db.VarChar(255)
+  profileImage String?   @db.VarChar(255)
 
   province String @db.VarChar(25)
+
+  transcriptions Transcription[]
+  multimedias    Multimedia[]
+}
+
+// Model for Transcription entity
+
+model Transcription {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  multimediaId Int
+  multimedia   Multimedia @relation(fields: [multimediaId], references: [id])
+  
+  text     String  @db.Text
+  language String? @default("en")
+  status   String? @default("pending")
+
+  words Word[]
+}
+
+enum FileType {
+  Audio
+  Video
+}
+
+model Multimedia {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  fileType FileType
+  fileUrl  String @db.VarChar(255)
+  name     String @db.VarChar(255)
+  status   String? @default("pending")
+  language String? @default("en")
+
+  transcriptions Transcription[]
+}
+
+// Model for "Word" entity which is used to store the words from the transcriptions and the period of time they were spoken
+
+model Word {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transcriptionId Int
+  transcription   Transcription @relation(fields: [transcriptionId], references: [id])
+  initialTime     Decimal
+  finalTime       Decimal
+  word            String
 }
