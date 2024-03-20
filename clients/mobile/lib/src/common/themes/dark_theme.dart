@@ -15,7 +15,8 @@ ThemeData darkTheme() {
     extensions: [CustomThemeExtension.darkMode],
     appBarTheme: const AppBarTheme(
       centerTitle: false,
-      backgroundColor: Colors.transparent,
+      backgroundColor: MyColors.black87,
+      surfaceTintColor: Colors.grey,
       titleTextStyle: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w700,
