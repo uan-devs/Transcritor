@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transcritor/src/common/models/transcription.dart';
-import 'package:faker/faker.dart';
 import 'package:transcritor/src/features/home/data/transcripts_repository.dart';
 
 class TranscriptsListScreen extends ConsumerStatefulWidget {
@@ -26,21 +23,6 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final transcriptionMockList = List.generate(
-      10,
-      (index) => Transcription(
-        id: index,
-        createdAt: DateTime.now()
-            .subtract(Duration(hours: Random().nextInt(300)))
-            .toIso8601String(),
-        text: faker.lorem.sentence(),
-        language: 'pt-BR',
-        multimedia: Multimedia(
-          name: '${faker.person.name()}.wav',
-        ),
-      ),
-    );
-
     final repository = ref.watch(transcriptsRepositoryProvider);
 
     return FutureBuilder(
@@ -84,57 +66,45 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
                     ),
                   ),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    childCount: transcriptionMockList.length,
-                    (context, index) {
-                      final e = transcriptionMockList[index];
-                      final date = DateTime.parse(e.createdAt);
-                      final hourPassed =
-                          DateTime.now().difference(date).inHours;
-                      final dayPassed = DateTime.now().difference(date).inDays;
-                      final monthPassed =
-                          DateTime.now().difference(date).inDays ~/ 30;
-
-                      final createdAt = hourPassed == 0
-                          ? 'Há pouco tempo'
-                          : hourPassed < 24
-                              ? 'Há $hourPassed horas'
-                              : dayPassed < 30
-                                  ? 'Há $dayPassed dias'
-                                  : 'Há $monthPassed meses';
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 20,
-                        ),
-                        child: ListTile(
-                          onTap: () {},
-                          title: Text(
-                            e.multimedia!.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          subtitle: Text(
-                            e.text.length > 30
-                                ? '${e.text.substring(0, 30)}...'
-                                : e.text,
-                          ),
-                          trailing: Text(
-                            createdAt,
-                            style: const TextStyle(
-                              fontSize: 12,
-                            ),
-                          ),
-                          leading: const Icon(Icons.lyrics),
-                        ),
-                      );
-                    },
+                if (repository.transcripts.isEmpty) ...[
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Text(
+                        'Comece por criar uma transcrição',
+                      ),
+                    ),
                   ),
-                ),
+                ] else ...[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      childCount: repository.transcripts.length,
+                      (context, index) {
+                        final e = repository.transcripts[index];
+                        final date = DateTime.parse(e.createdAt);
+                        final hourPassed =
+                            DateTime.now().difference(date).inHours;
+                        final dayPassed =
+                            DateTime.now().difference(date).inDays;
+                        final monthPassed =
+                            DateTime.now().difference(date).inDays ~/ 30;
+
+                        final createdAt = hourPassed == 0
+                            ? 'Há pouco tempo'
+                            : hourPassed < 24
+                                ? 'Há $hourPassed horas'
+                                : dayPassed < 30
+                                    ? 'Há $dayPassed dias'
+                                    : 'Há $monthPassed meses';
+
+                        return TranscriptItem(
+                          transcription: e,
+                          createdAt: createdAt,
+                        );
+                      },
+                    ),
+                  ),
+                ],
                 const SliverToBoxAdapter(
                   child: SizedBox(
                     height: 50,
@@ -144,5 +114,48 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
             ),
           );
         });
+  }
+}
+
+class TranscriptItem extends StatelessWidget {
+  const TranscriptItem({
+    super.key,
+    required this.transcription,
+    required this.createdAt,
+  });
+
+  final Transcription transcription;
+  final String createdAt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: 10,
+        horizontal: 20,
+      ),
+      child: ListTile(
+        onTap: () {},
+        title: Text(
+          transcription.multimedia!.name,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        subtitle: Text(
+          transcription.text.length > 30
+              ? '${transcription.text.substring(0, 30)}...'
+              : transcription.text,
+        ),
+        trailing: Text(
+          createdAt,
+          style: const TextStyle(
+            fontSize: 12,
+          ),
+        ),
+        leading: const Icon(Icons.lyrics),
+      ),
+    );
   }
 }

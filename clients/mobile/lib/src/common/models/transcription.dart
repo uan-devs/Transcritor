@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class Transcription {
-  final String id;
+  final int id;
   final String text;
   final String createdAt;
   final String language;
@@ -18,7 +18,7 @@ class Transcription {
   });
 
   Transcription copyWith({
-    String? id,
+    int? id,
     String? text,
     String? createdAt,
     String? language,
@@ -48,18 +48,17 @@ class Transcription {
 
   factory Transcription.fromMap(Map<String, dynamic> map) {
     return Transcription(
-      id: map['id'] as String,
+      id: map['id'] as int,
       text: map['text'] as String,
       createdAt: map['createdAt'] as String,
       language: map['language'] as String,
       multimedia: map['multimedia'] != null
           ? Multimedia.fromMap(map['multimedia'] as Map<String, dynamic>)
           : null,
-      words: List<Word>.from(
-        (map['words'] as List<int>).map<Word>(
-          (x) => Word.fromMap(x as Map<String, dynamic>),
-        ),
-      ),
+      words: map['words'] != null
+          ? List<Word>.from(
+              (map['words'] as List).map((x) => Word.fromMap(x as Map<String, dynamic>)))
+          : [],
     );
   }
 
@@ -164,7 +163,7 @@ class Multimedia {
   factory Multimedia.fromMap(Map<String, dynamic> map) {
     return Multimedia(
       name: map['name'] as String,
-      url: map['url'] as String,
+      url: map['url'] as String?,
     );
   }
 
