@@ -6,6 +6,7 @@ import 'package:transcritor/src/common/routes/scaffold_with_nested_navigation.da
 import 'package:transcritor/src/features/auth/data/transcritor_auth.dart';
 import 'package:transcritor/src/features/auth/presentation/login/login_screen.dart';
 import 'package:transcritor/src/features/auth/presentation/signup/signup_screen.dart';
+import 'package:transcritor/src/features/home/data/transcripts_repository.dart';
 import 'package:transcritor/src/features/home/presentation/home_screen.dart';
 import 'package:transcritor/src/features/onboarding/data/onboarding_repository.dart';
 import 'package:transcritor/src/features/onboarding/presentation/onboarding_screen.dart';
@@ -94,6 +95,7 @@ GoRouter goRouter(ProviderRef ref) {
         }
       } else {
         if (path != '/login' && path != '/signup') {
+          ref.invalidate(transcriptsRepositoryProvider);
           return '/login';
         }
       }
