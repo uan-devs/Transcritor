@@ -6,7 +6,7 @@ class Transcription {
   final String createdAt;
   final String language;
   Multimedia? multimedia;
-  List<Word>? words;
+  List<Sentence>? sentences;
 
   Transcription({
     required this.id,
@@ -14,7 +14,7 @@ class Transcription {
     required this.createdAt,
     required this.language,
     this.multimedia,
-    this.words = const [],
+    this.sentences = const [],
   });
 
   Transcription copyWith({
@@ -23,7 +23,7 @@ class Transcription {
     String? createdAt,
     String? language,
     Multimedia? multimedia,
-    List<Word>? words,
+    List<Sentence>? sentences,
   }) {
     return Transcription(
       id: id ?? this.id,
@@ -31,7 +31,7 @@ class Transcription {
       createdAt: createdAt ?? this.createdAt,
       language: language ?? this.language,
       multimedia: multimedia ?? this.multimedia,
-      words: words ?? this.words,
+      sentences: sentences ?? this.sentences,
     );
   }
 
@@ -42,7 +42,7 @@ class Transcription {
       'createdAt': createdAt,
       'language': language,
       'multimedia': multimedia?.toMap(),
-      'words': words?.map((x) => x.toMap()).toList(),
+      'sentences': sentences?.map((x) => x.toMap()).toList(),
     };
   }
 
@@ -55,9 +55,9 @@ class Transcription {
       multimedia: map['multimedia'] != null
           ? Multimedia.fromMap(map['multimedia'] as Map<String, dynamic>)
           : null,
-      words: map['words'] != null
-          ? List<Word>.from(
-              (map['words'] as List).map((x) => Word.fromMap(x as Map<String, dynamic>)))
+      sentences: map['sentences'] != null
+          ? List<Sentence>.from(
+              (map['sentences'] as List).map((x) => Sentence.fromMap(x as Map<String, dynamic>)))
           : [],
     );
   }
@@ -69,28 +69,28 @@ class Transcription {
 
   @override
   String toString() {
-    return 'Transcription(id: $id, text: $text, createdAt: $createdAt, language: $language, multimedia: $multimedia, words: $words)';
+    return 'Transcription(id: $id, text: $text, createdAt: $createdAt, language: $language, multimedia: $multimedia, sentences: $sentences)';
   }
 }
 
-class Word {
-  final String word;
+class Sentence {
+  final String sentence;
   final String initialTime;
   final String finalTime;
 
-  Word({
-    required this.word,
+  Sentence({
+    required this.sentence,
     required this.initialTime,
     required this.finalTime,
   });
 
-  Word copyWith({
-    String? word,
+  Sentence copyWith({
+    String? sentence,
     String? initialTime,
     String? finalTime,
   }) {
-    return Word(
-      word: word ?? this.word,
+    return Sentence(
+      sentence: sentence ?? this.sentence,
       initialTime: initialTime ?? this.initialTime,
       finalTime: finalTime ?? this.finalTime,
     );
@@ -98,15 +98,15 @@ class Word {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'word': word,
+      'sentence': sentence,
       'initialTime': initialTime,
       'finalTime': finalTime,
     };
   }
 
-  factory Word.fromMap(Map<String, dynamic> map) {
-    return Word(
-      word: map['word'] as String,
+  factory Sentence.fromMap(Map<String, dynamic> map) {
+    return Sentence(
+      sentence: map['sentence'] as String,
       initialTime: map['initialTime'] as String,
       finalTime: map['finalTime'] as String,
     );
@@ -114,24 +114,24 @@ class Word {
 
   String toJson() => json.encode(toMap());
 
-  factory Word.fromJson(String source) =>
-      Word.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Sentence.fromJson(String source) =>
+      Sentence.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() =>
-      'Word(word: $word, initialTime: $initialTime, finalTime: $finalTime)';
+      'sentence(sentence: $sentence, initialTime: $initialTime, finalTime: $finalTime)';
 
   @override
-  bool operator ==(covariant Word other) {
+  bool operator ==(covariant Sentence other) {
     if (identical(this, other)) return true;
 
-    return other.word == word &&
+    return other.sentence == sentence &&
         other.initialTime == initialTime &&
         other.finalTime == finalTime;
   }
 
   @override
-  int get hashCode => word.hashCode ^ initialTime.hashCode ^ finalTime.hashCode;
+  int get hashCode => sentence.hashCode ^ initialTime.hashCode ^ finalTime.hashCode;
 }
 
 class Multimedia {
