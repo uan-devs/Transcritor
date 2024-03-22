@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:transcritor/src/common/models/transcription.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/transcript_detail_screen.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/transcript_list_controller.dart';
+import 'package:transcritor/src/features/home/presentation/transcripts/widgets/transcript_item.dart';
 
 class TranscriptsListScreen extends ConsumerStatefulWidget {
   const TranscriptsListScreen({super.key});
@@ -98,34 +98,64 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
                                     ? 'Há $dayPassed dias'
                                     : 'Há $monthPassed meses';
 
-                        return TranscriptItem(
-                          onTap: () {
-                            showGeneralDialog(
-                              context: context,
-                              transitionDuration: const Duration(
-                                milliseconds: 225,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Dismissible(
+                            key: ValueKey(e.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              margin: const EdgeInsets.all(20),
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              transitionBuilder:
-                                  (context, anim1, anim2, child) {
-                                const begin = Offset(0.0, 1.0);
-                                const end = Offset.zero;
-                                final tween = Tween(begin: begin, end: end);
-                                final offsetAnimation = anim1.drive(tween);
+                              child: const Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ),
+                            confirmDismiss: (direction) async {
+                              return ref
+                                  .read(transcriptsControllerProvider)
+                                  .confirmDeleteTranscription(e.id, context);
+                            },
+                            onDismissed: (direction) {
+                              ref
+                                  .read(transcriptsControllerProvider)
+                                  .deleteTranscription(e.id, context);
+                            },
+                            child: TranscriptItem(
+                              onTap: () {
+                                showGeneralDialog(
+                                  context: context,
+                                  transitionDuration: const Duration(
+                                    milliseconds: 225,
+                                  ),
+                                  transitionBuilder:
+                                      (context, anim1, anim2, child) {
+                                    const begin = Offset(0.0, 1.0);
+                                    const end = Offset.zero;
+                                    final tween = Tween(begin: begin, end: end);
+                                    final offsetAnimation = anim1.drive(tween);
 
-                                return SlideTransition(
-                                  position: offsetAnimation,
-                                  child: child,
+                                    return SlideTransition(
+                                      position: offsetAnimation,
+                                      child: child,
+                                    );
+                                  },
+                                  pageBuilder: (context, anim1, anim2) {
+                                    return TranscriptDetailScreen(
+                                      id: e.id,
+                                    );
+                                  },
                                 );
                               },
-                              pageBuilder: (context, anim1, anim2) {
-                                return TranscriptDetailScreen(
-                                  id: e.id,
-                                );
-                              },
-                            );
-                          },
-                          transcription: e,
-                          createdAt: createdAt,
+                              transcription: e,
+                              createdAt: createdAt,
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -140,50 +170,5 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
             ),
           );
         });
-  }
-}
-
-class TranscriptItem extends StatelessWidget {
-  const TranscriptItem({
-    super.key,
-    required this.transcription,
-    required this.createdAt,
-    required this.onTap,
-  });
-
-  final Transcription transcription;
-  final String createdAt;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 10,
-        horizontal: 20,
-      ),
-      child: ListTile(
-        onTap: onTap,
-        title: Text(
-          transcription.multimedia!.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        subtitle: Text(
-          transcription.text.length > 30
-              ? '${transcription.text.substring(0, 30)}...'
-              : transcription.text,
-        ),
-        trailing: Text(
-          createdAt,
-          style: const TextStyle(
-            fontSize: 12,
-          ),
-        ),
-        leading: const Icon(Icons.lyrics),
-      ),
-    );
   }
 }

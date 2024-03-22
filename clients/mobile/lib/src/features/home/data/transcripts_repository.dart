@@ -99,4 +99,24 @@ class TranscriptsRepository {
       return Left(AuthException(key: ''));
     }
   }
+
+  Future<Either<AuthException, void>> deleteTranscription(int id) async {
+    final response = await restClient.auth.deleteRequest(
+      path: '${UrlsConstants.singleTranscriptionUrl}$id',
+    );
+
+    debugPrint('Path: ${UrlsConstants.singleTranscriptionUrl}/$id');
+    debugPrint('Deleting transcription...: ${response.statusCode}');
+
+    switch (response.statusCode) {
+      case 401:
+      case 403:
+        return Left(AuthException(key: 'INVALID_CREDENTIALS'));
+      case 204:
+        _transcripts.removeWhere((element) => element.id == id);
+        return const Right(null);
+      default:
+        return Left(AuthException(key: ''));
+    }
+  }
 }
