@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transcritor/src/common/models/transcription.dart';
-import 'package:transcritor/src/features/home/data/transcripts_repository.dart';
+import 'package:transcritor/src/features/home/presentation/transcripts/transcript_detail_screen.dart';
+import 'package:transcritor/src/features/home/presentation/transcripts/transcript_list_controller.dart';
 
 class TranscriptsListScreen extends ConsumerStatefulWidget {
   const TranscriptsListScreen({super.key});
@@ -18,12 +19,12 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
   initState() {
     super.initState();
     _fetchTranscriptions =
-        ref.read(transcriptsRepositoryProvider).fetchTranscriptions();
+        ref.read(transcriptsControllerProvider).fetchTranscriptions();
   }
 
   @override
   Widget build(BuildContext context) {
-    final repository = ref.watch(transcriptsRepositoryProvider);
+    final controller = ref.watch(transcriptsControllerProvider);
 
     return FutureBuilder(
         future: _fetchTranscriptions,
@@ -43,7 +44,7 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
           return RefreshIndicator.adaptive(
             onRefresh: () async {
               await ref
-                  .read(transcriptsRepositoryProvider)
+                  .read(transcriptsControllerProvider)
                   .fetchTranscriptions();
             },
             child: CustomScrollView(
@@ -66,7 +67,7 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
                     ),
                   ),
                 ),
-                if (repository.transcripts.isEmpty) ...[
+                if (controller.transcripts.isEmpty) ...[
                   const SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
@@ -78,9 +79,9 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
                 ] else ...[
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      childCount: repository.transcripts.length,
+                      childCount: controller.transcripts.length,
                       (context, index) {
-                        final e = repository.transcripts[index];
+                        final e = controller.transcripts[index];
                         final date = DateTime.parse(e.createdAt);
                         final hourPassed =
                             DateTime.now().difference(date).inHours;
@@ -98,6 +99,31 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
                                     : 'Há $monthPassed meses';
 
                         return TranscriptItem(
+                          onTap: () {
+                            showGeneralDialog(
+                              context: context,
+                              transitionDuration: const Duration(
+                                milliseconds: 225,
+                              ),
+                              transitionBuilder:
+                                  (context, anim1, anim2, child) {
+                                const begin = Offset(0.0, 1.0);
+                                const end = Offset.zero;
+                                final tween = Tween(begin: begin, end: end);
+                                final offsetAnimation = anim1.drive(tween);
+
+                                return SlideTransition(
+                                  position: offsetAnimation,
+                                  child: child,
+                                );
+                              },
+                              pageBuilder: (context, anim1, anim2) {
+                                return TranscriptDetailScreen(
+                                  id: e.id,
+                                );
+                              },
+                            );
+                          },
                           transcription: e,
                           createdAt: createdAt,
                         );
@@ -122,10 +148,12 @@ class TranscriptItem extends StatelessWidget {
     super.key,
     required this.transcription,
     required this.createdAt,
+    required this.onTap,
   });
 
   final Transcription transcription;
   final String createdAt;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +163,7 @@ class TranscriptItem extends StatelessWidget {
         horizontal: 20,
       ),
       child: ListTile(
-        onTap: () {},
+        onTap: onTap,
         title: Text(
           transcription.multimedia!.name,
           style: const TextStyle(
