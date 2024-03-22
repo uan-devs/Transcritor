@@ -8,4 +8,7 @@ sealed class UrlsConstants {
   static const String editUserProfilePhotoUrl = '/users/upload-image';
   static const String changeUserPassword = '/users/change-password';
   static const String updateUserPhoto = '/users/upload-image';
+  static const String fetchTranscriptionsUrl = '/transcription/list';
+  static const String singleTranscriptionUrl = '/transcription/';
+  static const String createTranscriptionUrl = '/transcription/create';
 }

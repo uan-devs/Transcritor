@@ -124,6 +124,7 @@ export class TranscriptionService {
         language: transcription.language,
         multimedia: {
           name: transcription.multimedia.name,
+          url: transcription.multimedia.fileUrl,
         },
       };
     });
@@ -145,6 +146,25 @@ export class TranscriptionService {
       throw new NotFoundException('Transcription not found');
     }
 
+    // Transform words with the same initialTime into a sentence, and set the finalTime of the sentence to the finalTime of the last word
+    const sentences = transcription.words.reduce((acc, word) => {
+      const initialTimeStr = word.initialTime.toString();
+      const existingSentence = acc.find(
+        (sentence) => sentence.initialTime === initialTimeStr,
+      );
+      if (existingSentence) {
+        existingSentence.sentence += ' ' + word.word;
+        existingSentence.finalTime = word.finalTime;
+      } else {
+        acc.push({
+          initialTime: initialTimeStr,
+          sentence: word.word,
+          finalTime: word.finalTime,
+        });
+      }
+      return acc;
+    }, []);
+
     return {
       id: transcription.id,
       createdAt: transcription.createdAt,
@@ -154,13 +174,7 @@ export class TranscriptionService {
         name: transcription.multimedia.name,
         url: transcription.multimedia.fileUrl,
       },
-      words: transcription.words.map((word) => {
-        return {
-          word: word.word,
-          initialTime: word.initialTime,
-          finalTime: word.finalTime,
-        };
-      }),
+      sentences: sentences,
     };
   }
 
