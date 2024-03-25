@@ -8,20 +8,25 @@ import 'package:transcritor/src/features/auth/presentation/login/login_screen.da
 import 'package:transcritor/src/features/auth/presentation/signup/signup_screen.dart';
 import 'package:transcritor/src/features/home/data/transcripts_repository.dart';
 import 'package:transcritor/src/features/home/presentation/home_screen.dart';
+import 'package:transcritor/src/features/home/presentation/transcripts/transcript_create_screen.dart';
+import 'package:transcritor/src/features/home/presentation/transcripts/transcript_list_controller.dart';
 import 'package:transcritor/src/features/onboarding/data/onboarding_repository.dart';
 import 'package:transcritor/src/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:transcritor/src/features/settings/settings_screen.dart';
+import 'package:transcritor/src/features/settings/user/user_profile_controller.dart';
 import 'package:transcritor/src/features/settings/user/user_profile_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _listNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
 final _settingsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'settings');
+final _createNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'create');
 
 enum AppRoutes {
   onboarding,
   home,
   settings,
   userProfile,
+  create,
   login,
   signup,
 }
@@ -95,7 +100,13 @@ GoRouter goRouter(ProviderRef ref) {
         }
       } else {
         if (path != '/login' && path != '/signup') {
+          // Reset all controllers providers
+          ref.invalidate(transcriptsControllerProvider);
+          ref.invalidate(userProfileControllerProvider);
+
+          // Reset all repositories providers
           ref.invalidate(transcriptsRepositoryProvider);
+
           return '/login';
         }
       }
@@ -145,13 +156,29 @@ GoRouter goRouter(ProviderRef ref) {
             ],
           ),
           StatefulShellBranch(
+            navigatorKey: _createNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/create',
+                name: AppRoutes.create.name,
+                pageBuilder: (context, state) => _customSlideTransitionPage(
+                  context: context,
+                  state: state,
+                  child: const TranscriptCreateScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
             navigatorKey: _settingsNavigatorKey,
             routes: [
               GoRoute(
                 path: '/settings',
                 name: AppRoutes.settings.name,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: SettingsScreen(),
+                pageBuilder: (context, state) => _customSlideTransitionPage(
+                  context: context,
+                  state: state,
+                  child: const SettingsScreen(),
                 ),
                 routes: [
                   GoRoute(

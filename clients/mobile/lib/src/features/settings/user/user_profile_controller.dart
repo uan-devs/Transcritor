@@ -23,8 +23,7 @@ class UserProfileController {
 
   UserProfileController({required this.auth});
 
-  File? _image;
-  File? get image => _image;
+  File? image;
   User? get user => auth.user;
 
   Future<void> updateProfile({
@@ -37,11 +36,12 @@ class UserProfileController {
       firstName: firstName,
       lastName: lastName,
       birthDate: birthDate,
-      image: _image,
+      image: image,
     );
 
     response.fold(
       (error) {
+        image = null;
         if (context.mounted) {
           showAdaptiveDialog(
             context: context,
@@ -70,11 +70,12 @@ class UserProfileController {
 
     if (imageFile == null) return;
 
-    _image = File(imageFile.path);
+    image = File(imageFile.path);
   }
 
   Future<ImageSource?> handleImageSource(BuildContext context) async {
     return await showAdaptiveActionSheet<ImageSource>(
+      useRootNavigator: false,
       context: context,
       title: const Text('Selecione a fonte da imagem'),
       actions: [

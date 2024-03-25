@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:transcritor/src/common/models/transcription.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/transcript_detail_screen.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/transcript_list_controller.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/widgets/transcript_item.dart';
@@ -13,18 +14,19 @@ class TranscriptsListScreen extends ConsumerStatefulWidget {
 }
 
 class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
-  late Future<dynamic> _fetchTranscriptions;
+  late Future<void> _fetchTranscriptions;
 
   @override
   initState() {
     super.initState();
-    _fetchTranscriptions =
-        ref.read(transcriptsControllerProvider).fetchTranscriptions();
+    _fetchTranscriptions = ref
+        .read(transcriptsControllerProvider.notifier)
+        .fetchTranscriptions();
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = ref.watch(transcriptsControllerProvider);
+    List<Transcription> transcripts = ref.watch(transcriptsControllerProvider);
 
     return FutureBuilder(
         future: _fetchTranscriptions,
@@ -36,16 +38,36 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
           }
 
           if (snap.hasError) {
-            return const Center(
-              child: Text('Erro ao carregar transcrições'),
+            final error = snap.error.toString();
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  _fetchTranscriptions = ref
+                      .read(transcriptsControllerProvider.notifier)
+                      .fetchTranscriptions();
+                });
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Text(error),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
 
           return RefreshIndicator.adaptive(
             onRefresh: () async {
-              await ref
-                  .read(transcriptsControllerProvider)
-                  .fetchTranscriptions();
+              setState(() {
+                _fetchTranscriptions = ref
+                    .read(transcriptsControllerProvider.notifier)
+                    .fetchTranscriptions();
+              });
             },
             child: CustomScrollView(
               slivers: [
@@ -67,7 +89,7 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
                     ),
                   ),
                 ),
-                if (controller.transcripts.isEmpty) ...[
+                if (transcripts.isEmpty) ...[
                   const SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
@@ -79,9 +101,9 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
                 ] else ...[
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      childCount: controller.transcripts.length,
+                      childCount: transcripts.length,
                       (context, index) {
-                        final e = controller.transcripts[index];
+                        final e = transcripts[index];
                         final date = DateTime.parse(e.createdAt);
                         final hourPassed =
                             DateTime.now().difference(date).inHours;
@@ -117,14 +139,9 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
                               ),
                             ),
                             confirmDismiss: (direction) async {
-                              return ref
-                                  .read(transcriptsControllerProvider)
+                              return await ref
+                                  .read(transcriptsControllerProvider.notifier)
                                   .confirmDeleteTranscription(e.id, context);
-                            },
-                            onDismissed: (direction) {
-                              ref
-                                  .read(transcriptsControllerProvider)
-                                  .deleteTranscription(e.id, context);
                             },
                             child: TranscriptItem(
                               onTap: () {

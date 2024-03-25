@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:transcritor/src/common/constants/storage_keys.dart';
 import 'package:transcritor/src/common/constants/urls.dart';
 import 'package:transcritor/src/common/storage/secure/secure_storage_impl.dart';
@@ -128,6 +129,8 @@ final class RestClient {
     required String fieldName,
     required File file,
     required String method,
+    required String type,
+    required String subtype,
     Map<String, String>? headers,
   }) async {
     if (_isAuth) {
@@ -153,6 +156,7 @@ final class RestClient {
       stream,
       length,
       filename: file.path.split('/').last,
+      contentType: MediaType(type, subtype),
     );
 
     request.files.add(multipart);

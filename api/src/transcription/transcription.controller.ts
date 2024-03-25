@@ -15,6 +15,7 @@ import { TranscriptionService } from './transcription.service';
 import { JwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @UseGuards(JwtGuard)
 @Controller('transcription')
@@ -22,13 +23,23 @@ export class TranscriptionController {
   constructor(private readonly transcriptionService: TranscriptionService) {}
 
   @Post('create')
-  @UseInterceptors(FileInterceptor('media'))
-  createTranscription(
+  @UseInterceptors(
+    FileInterceptor('media', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename(req, file, cb) {
+          console.log(file);
+          cb(null, file.originalname);
+        },
+      }),
+    }),
+  )
+  async createTranscription(
     @GetUser('id') userId: number,
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
-          fileType: 'wav',
+          fileType: new RegExp('audio/(ogg|wav|mp3|mp4|m4a)'),
         })
         .addMaxSizeValidator({
           maxSize: 10 * 1024 * 1024,
@@ -42,6 +53,7 @@ export class TranscriptionController {
     )
     file: Express.Multer.File,
   ) {
+    console.log(file);
     return this.transcriptionService.createTranscription(userId, file);
   }
 

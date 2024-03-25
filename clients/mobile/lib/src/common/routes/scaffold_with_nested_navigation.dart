@@ -48,6 +48,7 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
     required this.currentIndex,
     required this.onDestinationSelected,
   });
+
   final Widget body;
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -64,6 +65,11 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
             icon: Icon(Icons.list_outlined),
             activeIcon: Icon(Icons.list),
             label: 'Transcrições',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.voice_chat),
+            activeIcon: Icon(Icons.voice_chat),
+            label: 'Nova transcrição',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
@@ -84,6 +90,7 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
     required this.currentIndex,
     required this.onDestinationSelected,
   });
+
   final Widget body;
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;

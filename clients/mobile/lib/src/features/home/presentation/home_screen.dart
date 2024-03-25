@@ -27,12 +27,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
         },
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        shape: const CircleBorder(),
-        child: const Icon(Icons.mic),
-      ),
     );
   }
 }

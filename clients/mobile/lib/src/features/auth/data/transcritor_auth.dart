@@ -365,6 +365,8 @@ class TranscritorAuth implements AuthRepository {
         file: image,
         fieldName: 'photo',
         method: 'PATCH',
+        type: 'image',
+        subtype: image.path.split('.').last,
       );
 
       debugPrint('request feito ${response.statusCode} - ${response.body}');

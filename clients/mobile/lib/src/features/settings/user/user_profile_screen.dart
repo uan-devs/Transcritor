@@ -96,7 +96,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           GestureDetector(
                             onTap: isEditing
                                 ? () async {
-                                    await userController.pickImage(context);
+                                    await ref
+                                        .read(userProfileControllerProvider)
+                                        .pickImage(context);
                                   }
                                 : null,
                             child: Container(
