@@ -37,10 +37,11 @@ export class FirebaseService {
 
   async uploadImage(file: Express.Multer.File) {
     const randomName = createId();
+    const shortName = file.originalname.replaceAll(/\s/g, '').slice(-10);
     return await this.uploadFile(
       file.buffer,
       file.mimetype,
-      `profileImages/${randomName}-${file.originalname.replaceAll(/\s/g, '')}`,
+      `profileImages/${randomName}-${shortName}`,
     );
   }
 
@@ -49,7 +50,7 @@ export class FirebaseService {
     return await this.uploadFile(
       buffer,
       mimetype,
-      `audioFiles/${randomName}-${name.replaceAll(/\s/g, '')}`,
+      `audioFiles/${randomName}-${name.replaceAll(/\s/g, '').slice(-10)}`,
     );
   }
 

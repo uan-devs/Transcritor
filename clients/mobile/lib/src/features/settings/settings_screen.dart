@@ -41,7 +41,7 @@ class SettingsScreen extends StatelessWidget {
                     leading: const Icon(Icons.person),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
-                      context.goNamed(AppRoutes.userProfile.name);
+                      context.pushNamed(AppRoutes.userProfile.name);
                     },
                   ),
                 ],

@@ -75,6 +75,7 @@ class UserProfileController {
 
   Future<ImageSource?> handleImageSource(BuildContext context) async {
     return await showAdaptiveActionSheet<ImageSource>(
+      useRootNavigator: false,
       context: context,
       title: const Text('Selecione a fonte da imagem'),
       actions: [
