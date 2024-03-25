@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transcritor/src/common/api/rest_client.dart';
 import 'package:transcritor/src/common/constants/urls.dart';
@@ -11,9 +10,10 @@ import 'package:transcritor/src/common/exceptions/auth_exception.dart';
 import 'package:transcritor/src/common/models/transcription.dart';
 
 final transcriptsRepositoryProvider = Provider<TranscriptsRepository>(
-  (ref) => TranscriptsRepository(
-    restClient: ref.watch(restClientProvider),
-  ),
+      (ref) =>
+      TranscriptsRepository(
+        restClient: ref.watch(restClientProvider),
+      ),
 );
 
 class TranscriptsRepository {
@@ -28,7 +28,7 @@ class TranscriptsRepository {
   Future<Either<AuthException, Transcription>> getAndUpdateTranscription(
       int id) async {
     final transcription = _transcripts.firstWhereOrNull(
-      (element) => element.id == id,
+          (element) => element.id == id,
     );
 
     if (transcription != null &&
@@ -39,9 +39,6 @@ class TranscriptsRepository {
       final response = await restClient.auth.getRequest(
         path: '${UrlsConstants.singleTranscriptionUrl}$id',
       );
-
-      debugPrint('Path: ${UrlsConstants.singleTranscriptionUrl}/$id');
-      debugPrint('Fetching transcription...: ${response.statusCode}');
 
       switch (response.statusCode) {
         case 401:
@@ -54,13 +51,11 @@ class TranscriptsRepository {
 
             int index = _transcripts.indexWhere((element) => element.id == id);
             if (index != -1) {
-              debugPrint('Updating transcription...');
               _transcripts[index] = updatedTranscription;
             }
 
             return Right(updatedTranscription);
           } catch (e) {
-            debugPrint('Error: $e');
             return Left(AuthException(key: 'BAD_RESPONSE'));
           }
         default:
@@ -70,12 +65,10 @@ class TranscriptsRepository {
   }
 
   Future<Either<AuthException, List<Transcription>>>
-      fetchTranscriptions() async {
+  fetchTranscriptions() async {
     try {
       final response = await restClient.auth
           .getRequest(path: UrlsConstants.fetchTranscriptionsUrl);
-
-      debugPrint('Fetching transcriptions... ${response.statusCode} ${response.body}');
 
       switch (response.statusCode) {
         case 401:
@@ -96,7 +89,6 @@ class TranscriptsRepository {
 
             break;
           } catch (e) {
-            debugPrint('Error: $e');
             return Left(AuthException(key: 'BAD_RESPONSE'));
           }
         default:
@@ -110,22 +102,23 @@ class TranscriptsRepository {
   }
 
   Future<Either<AuthException, void>> deleteTranscription(int id) async {
-    final response = await restClient.auth.deleteRequest(
-      path: '${UrlsConstants.singleTranscriptionUrl}$id',
-    );
+    try {
+      final response = await restClient.auth.deleteRequest(
+        path: '${UrlsConstants.singleTranscriptionUrl}$id',
+      );
 
-    debugPrint('Path: ${UrlsConstants.singleTranscriptionUrl}/$id');
-    debugPrint('Deleting transcription...: ${response.statusCode}');
-
-    switch (response.statusCode) {
-      case 401:
-      case 403:
-        return Left(AuthException(key: 'INVALID_CREDENTIALS'));
-      case 204:
-        _transcripts.removeWhere((element) => element.id == id);
-        return const Right(null);
-      default:
-        return Left(AuthException(key: ''));
+      switch (response.statusCode) {
+        case 401:
+        case 403:
+          return Left(AuthException(key: 'INVALID_CREDENTIALS'));
+        case 204:
+          _transcripts.removeWhere((element) => element.id == id);
+          return const Right(null);
+        default:
+          return Left(AuthException(key: ''));
+      }
+    } catch (e) {
+      return Left(AuthException(key: ''));
     }
   }
 
@@ -138,11 +131,10 @@ class TranscriptsRepository {
         file: file,
         method: 'POST',
         type: 'audio',
-        subtype: file.path.split('.').last,
+        subtype: file.path
+            .split('.')
+            .last,
       );
-
-      debugPrint('Path: ${UrlsConstants.createTranscriptionUrl}');
-      debugPrint('Creating transcription...: ${response.statusCode}');
 
       switch (response.statusCode) {
         case 401:
@@ -154,11 +146,9 @@ class TranscriptsRepository {
             _transcripts.add(transcription);
             return Right(transcription);
           } catch (e) {
-            debugPrint('Error: $e');
             return Left(AuthException(key: 'BAD_RESPONSE'));
           }
         default:
-          debugPrint('Error: ${response.body}');
           return Left(AuthException(key: ''));
       }
     } catch (e) {

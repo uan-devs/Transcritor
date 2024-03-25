@@ -67,6 +67,10 @@ class Transcription {
   factory Transcription.fromJson(String source) =>
       Transcription.fromMap(json.decode(source) as Map<String, dynamic>);
 
+  bool hasAllElements() {
+    return multimedia != null && sentences != null && sentences!.isNotEmpty;
+  }
+
   @override
   String toString() {
     return 'Transcription(id: $id, text: $text, createdAt: $createdAt, language: $language, multimedia: $multimedia, sentences: $sentences)';

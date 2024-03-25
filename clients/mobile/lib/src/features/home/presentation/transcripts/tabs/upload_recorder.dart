@@ -73,12 +73,10 @@ class _UploadRecorderState extends ConsumerState<UploadRecorder> {
         dir = await getApplicationDocumentsDirectory();
       }
     } catch (e) {
-      debugPrint('Error: ${e.toString()}');
       return;
     }
 
     if (dir == null) {
-      debugPrint('Error: Directory is null');
       return;
     }
 
@@ -104,9 +102,6 @@ class _UploadRecorderState extends ConsumerState<UploadRecorder> {
 
     if (result != null) {
       _file = File(result);
-      debugPrint('Recording saved at: ${_file?.path}');
-    } else {
-      debugPrint('Error: Recording not saved');
     }
 
     setState(() {
@@ -122,7 +117,7 @@ class _UploadRecorderState extends ConsumerState<UploadRecorder> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (_isLoading) ...[const CircularProgressIndicator.adaptive()],
-          if (_file != null) ...[
+          if (_file != null && _isLoading) ...[
             const Spacer(),
             MediaPlayer(file: _file!),
             const Spacer(),
@@ -170,11 +165,9 @@ class _UploadRecorderState extends ConsumerState<UploadRecorder> {
             const SizedBox(height: 80),
             GestureDetector(
               onLongPressStart: (details) async {
-                debugPrint('Recording...');
                 await _startRecording();
               },
               onLongPressEnd: (details) async {
-                debugPrint('Recording stopped');
                 await _stopRecording();
               },
               child: Material(

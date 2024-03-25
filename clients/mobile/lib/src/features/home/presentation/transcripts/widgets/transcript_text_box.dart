@@ -80,11 +80,13 @@ class _TranscriptTextBoxState extends State<TranscriptTextBox> {
                   builder: (context, snap) {
                     final data = snap.data;
 
-                    _scrollController.animateTo(
-                      (data?.position.inSeconds.toDouble() ?? 0) * 40,
-                      duration: const Duration(milliseconds: 100),
-                      curve: Curves.easeInOut,
-                    );
+                    if (_scrollController.hasClients) {
+                      _scrollController.animateTo(
+                        (data?.position.inSeconds.toDouble() ?? 0) * 40,
+                        duration: const Duration(milliseconds: 100),
+                        curve: Curves.easeInOut,
+                      );
+                    }
 
                     return ListView.builder(
                       controller: _scrollController,
