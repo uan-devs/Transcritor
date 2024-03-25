@@ -55,11 +55,6 @@ class _UploadRecorderState extends ConsumerState<UploadRecorder> {
   }
 
   Future<void> _startRecording() async {
-    _startTimer();
-    setState(() {
-      _isRecording = true;
-    });
-
     Directory? dir;
 
     try {
@@ -73,14 +68,23 @@ class _UploadRecorderState extends ConsumerState<UploadRecorder> {
         dir = await getApplicationDocumentsDirectory();
       }
     } catch (e) {
+      debugPrint(e.toString());
       return;
     }
 
     if (dir == null) {
+      debugPrint('Directory is null');
       return;
     }
 
+    _startTimer();
+    setState(() {
+      _isRecording = true;
+    });
+
     final path = '${dir.path}/$_randomFileName';
+
+    debugPrint('Recording to: $path');
 
     await widget.recorder.start(
       const RecordConfig(
@@ -100,11 +104,12 @@ class _UploadRecorderState extends ConsumerState<UploadRecorder> {
 
     final result = await widget.recorder.stop();
 
-    if (result != null) {
-      _file = File(result);
-    }
+    debugPrint('Recording stopped: $result');
 
     setState(() {
+      if (result != null) {
+        _file = File(result);
+      }
       _isLoading = false;
     });
   }
@@ -117,7 +122,7 @@ class _UploadRecorderState extends ConsumerState<UploadRecorder> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (_isLoading) ...[const CircularProgressIndicator.adaptive()],
-          if (_file != null && _isLoading) ...[
+          if (_file != null && !_isLoading) ...[
             const Spacer(),
             MediaPlayer(file: _file!),
             const Spacer(),

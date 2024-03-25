@@ -40,7 +40,7 @@ class _TranscriptsListScreenState extends ConsumerState<TranscriptsListScreen> {
           if (snap.hasError) {
             final error = snap.error.toString();
 
-            return RefreshIndicator(
+            return RefreshIndicator.adaptive(
               onRefresh: () async {
                 setState(() {
                   _fetchTranscriptions = ref
