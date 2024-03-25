@@ -9,9 +9,11 @@ import 'package:transcritor/src/features/auth/presentation/signup/signup_screen.
 import 'package:transcritor/src/features/home/data/transcripts_repository.dart';
 import 'package:transcritor/src/features/home/presentation/home_screen.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/transcript_create_screen.dart';
+import 'package:transcritor/src/features/home/presentation/transcripts/transcript_list_controller.dart';
 import 'package:transcritor/src/features/onboarding/data/onboarding_repository.dart';
 import 'package:transcritor/src/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:transcritor/src/features/settings/settings_screen.dart';
+import 'package:transcritor/src/features/settings/user/user_profile_controller.dart';
 import 'package:transcritor/src/features/settings/user/user_profile_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -98,7 +100,13 @@ GoRouter goRouter(ProviderRef ref) {
         }
       } else {
         if (path != '/login' && path != '/signup') {
+          // Reset all controllers providers
+          ref.invalidate(transcriptsControllerProvider);
+          ref.invalidate(userProfileControllerProvider);
+
+          // Reset all repositories providers
           ref.invalidate(transcriptsRepositoryProvider);
+
           return '/login';
         }
       }

@@ -5,6 +5,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as speech from '@google-cloud/speech';
+import { exec } from 'child_process';
+import * as util from 'util';
+import * as fs from 'fs';
 import { FirebaseService } from '../firebase/firebase.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -18,10 +21,27 @@ export class TranscriptionService {
 
   async createTranscription(userId: number, file: Express.Multer.File) {
     const client = new speech.SpeechClient();
-    const audioBytes = file.buffer.toString('base64');
+
+    const filename = file.originalname.replace(/\.[^/.]+$/, '');
+
+    if (!file.mimetype.includes('wav')) {
+      const run = util.promisify(exec);
+
+      try {
+        await run(
+          `ffmpeg -i ${file.path} -ac 1 -ar 16000 ./uploads/${filename}.wav`,
+        );
+      } catch (error) {
+        throw new ServiceUnavailableException(
+          'Error converting the file. Please try again later.',
+        );
+      }
+    }
+
+    const audioBytes = fs.readFileSync(`./uploads/${filename}.wav`);
 
     const audio = {
-      content: audioBytes,
+      content: audioBytes.toString('base64'),
     };
 
     const [response] = await client.recognize({
@@ -34,7 +54,11 @@ export class TranscriptionService {
     });
 
     if (response !== null) {
-      const mediaUrl = await this.firebase.uploadMedia(file);
+      const mediaUrl = await this.firebase.uploadMedia(
+        audioBytes,
+        'audio/wave',
+        `${filename}.wav`,
+      );
 
       try {
         const [media, transcription] = await this.prisma.$transaction(
@@ -83,9 +107,13 @@ export class TranscriptionService {
         delete media.updatedAt;
 
         return {
-          ...transcription,
-          media: {
-            ...media,
+          id: transcription.id,
+          createdAt: transcription.createdAt,
+          text: transcription.text,
+          language: transcription.language,
+          multimedia: {
+            name: media.name,
+            url: media.fileUrl,
           },
         };
       } catch (error) {

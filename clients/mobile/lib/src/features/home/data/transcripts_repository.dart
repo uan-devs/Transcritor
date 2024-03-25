@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:collection/collection.dart';
@@ -30,7 +31,9 @@ class TranscriptsRepository {
       (element) => element.id == id,
     );
 
-    if (transcription != null && transcription.sentences != null && transcription.sentences!.isNotEmpty) {
+    if (transcription != null &&
+        transcription.sentences != null &&
+        transcription.sentences!.isNotEmpty) {
       return Right(transcription);
     } else {
       final response = await restClient.auth.getRequest(
@@ -68,10 +71,11 @@ class TranscriptsRepository {
 
   Future<Either<AuthException, List<Transcription>>>
       fetchTranscriptions() async {
-    debugPrint('Fetching transcriptions...');
     try {
       final response = await restClient.auth
           .getRequest(path: UrlsConstants.fetchTranscriptionsUrl);
+
+      debugPrint('Fetching transcriptions... ${response.statusCode} ${response.body}');
 
       switch (response.statusCode) {
         case 401:
@@ -81,9 +85,14 @@ class TranscriptsRepository {
           try {
             final body = jsonDecode(response.body) as List;
 
+            final apiList = <Transcription>[];
+
             for (var element in body) {
-              _transcripts.add(Transcription.fromMap(element));
+              apiList.add(Transcription.fromMap(element));
             }
+
+            _transcripts.clear();
+            _transcripts.addAll(apiList);
 
             break;
           } catch (e) {
@@ -117,6 +126,43 @@ class TranscriptsRepository {
         return const Right(null);
       default:
         return Left(AuthException(key: ''));
+    }
+  }
+
+  Future<Either<AuthException, Transcription>> createTranscription(
+      File file) async {
+    try {
+      final response = await restClient.auth.sendFile(
+        path: UrlsConstants.createTranscriptionUrl,
+        fieldName: 'media',
+        file: file,
+        method: 'POST',
+        type: 'audio',
+        subtype: file.path.split('.').last,
+      );
+
+      debugPrint('Path: ${UrlsConstants.createTranscriptionUrl}');
+      debugPrint('Creating transcription...: ${response.statusCode}');
+
+      switch (response.statusCode) {
+        case 401:
+        case 403:
+          return Left(AuthException(key: 'INVALID_CREDENTIALS'));
+        case 201:
+          try {
+            final transcription = Transcription.fromJson(response.body);
+            _transcripts.add(transcription);
+            return Right(transcription);
+          } catch (e) {
+            debugPrint('Error: $e');
+            return Left(AuthException(key: 'BAD_RESPONSE'));
+          }
+        default:
+          debugPrint('Error: ${response.body}');
+          return Left(AuthException(key: ''));
+      }
+    } catch (e) {
+      return Left(AuthException(key: ''));
     }
   }
 }

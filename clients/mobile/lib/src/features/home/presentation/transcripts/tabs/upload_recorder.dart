@@ -4,22 +4,24 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
+import 'package:transcritor/src/features/home/data/transcripts_repository.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/widgets/media_player.dart';
 
-class UploadRecorder extends StatefulWidget {
+class UploadRecorder extends ConsumerStatefulWidget {
   const UploadRecorder({super.key, required this.recorder});
 
   final AudioRecorder recorder;
 
   @override
-  State<UploadRecorder> createState() => _UploadRecorderState();
+  ConsumerState<UploadRecorder> createState() => _UploadRecorderState();
 }
 
-class _UploadRecorderState extends State<UploadRecorder> {
+class _UploadRecorderState extends ConsumerState<UploadRecorder> {
   bool _isRecording = false;
   bool _isLoading = false;
   Timer? _timer;
@@ -119,15 +121,30 @@ class _UploadRecorderState extends State<UploadRecorder> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (_isLoading) ...[
-            const CircularProgressIndicator.adaptive()
-          ],
+          if (_isLoading) ...[const CircularProgressIndicator.adaptive()],
           if (_file != null) ...[
             const Spacer(),
             MediaPlayer(file: _file!),
             const Spacer(),
             SlideAction(
-              onSubmit: () {},
+              onSubmit: () async {
+                if (_file == null) {
+                  return;
+                }
+
+                setState(() {
+                  _isLoading = true;
+                });
+
+                await ref
+                    .read(transcriptsRepositoryProvider)
+                    .createTranscription(_file!);
+
+                setState(() {
+                  _file = null;
+                  _isLoading = false;
+                });
+              },
               elevation: 20,
               text: 'Deslize para enviar',
               innerColor: MyColors.green.withOpacity(.7),
@@ -183,7 +200,9 @@ class _UploadRecorderState extends State<UploadRecorder> {
             ),
             const SizedBox(height: 20),
             Text(
-              _isRecording ? 'Largue para parar' : 'Pressione e segure para gravar',
+              _isRecording
+                  ? 'Largue para parar'
+                  : 'Pressione e segure para gravar',
             ),
           ],
         ],

@@ -25,6 +25,12 @@ class _MediaPlayerState extends State<MediaPlayer> {
     _player = AudioPlayer()..setFilePath(widget.file.path);
   }
 
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
   Stream<PositionData> get _positionDataStream {
     return Rx.combineLatest3<Duration?, Duration?, Duration?, PositionData>(
         _player.positionStream,

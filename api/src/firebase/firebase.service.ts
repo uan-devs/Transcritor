@@ -38,26 +38,29 @@ export class FirebaseService {
   async uploadImage(file: Express.Multer.File) {
     const randomName = createId();
     return await this.uploadFile(
-      file,
+      file.buffer,
+      file.mimetype,
       `profileImages/${randomName}-${file.originalname.replaceAll(/\s/g, '')}`,
     );
   }
 
-  async uploadMedia(file: Express.Multer.File) {
+  async uploadMedia(buffer: Buffer, mimetype: string, name: string) {
     const randomName = createId();
     return await this.uploadFile(
-      file,
-      `audioFiles/${randomName}-${file.originalname.replaceAll(/\s/g, '')}`,
+      buffer,
+      mimetype,
+      `audioFiles/${randomName}-${name.replaceAll(/\s/g, '')}`,
     );
   }
 
   private async uploadFile(
-    file: Express.Multer.File,
+    buffer: Buffer,
+    mimetype: string,
     path: string,
   ): Promise<string> {
     const newFile = ref(this.storage, path);
-    const upload = await uploadBytesResumable(newFile, file.buffer, {
-      contentType: file.mimetype,
+    const upload = await uploadBytesResumable(newFile, buffer, {
+      contentType: mimetype,
     });
     const fileUrl = await getDownloadURL(upload.ref);
 

@@ -2,21 +2,24 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:transcritor/src/common/utils/my_colors.dart';
+import 'package:transcritor/src/features/home/data/transcripts_repository.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/transcript_recorder_screen.dart';
 import 'package:transcritor/src/features/home/presentation/transcripts/widgets/media_player.dart';
 
-
-class TranscriptCreateScreen extends StatefulWidget {
+class TranscriptCreateScreen extends ConsumerStatefulWidget {
   const TranscriptCreateScreen({super.key});
 
   @override
-  State<TranscriptCreateScreen> createState() => _TranscriptCreateScreenState();
+  ConsumerState<TranscriptCreateScreen> createState() =>
+      _TranscriptCreateScreenState();
 }
 
-class _TranscriptCreateScreenState extends State<TranscriptCreateScreen> {
+class _TranscriptCreateScreenState
+    extends ConsumerState<TranscriptCreateScreen> {
   File? _file;
 
   Future<void> _pickFile() async {
@@ -117,7 +120,19 @@ class _TranscriptCreateScreenState extends State<TranscriptCreateScreen> {
                       MediaPlayer(file: _file!),
                       const Spacer(),
                       SlideAction(
-                        onSubmit: () {},
+                        onSubmit: () async {
+                          if (_file == null) {
+                            return;
+                          }
+
+                          await ref
+                              .read(transcriptsRepositoryProvider)
+                              .createTranscription(_file!);
+
+                          setState(() {
+                            _file = null;
+                          });
+                        },
                         elevation: 20,
                         text: 'Deslize para enviar',
                         innerColor: MyColors.green.withOpacity(.7),
